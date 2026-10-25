@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바이브코딩 ② 내 생활을 돕는 웹앱 만들기 | 남원중 35~36차시</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--navy:#1E3A8A;--blue:#2563EB;--sky:#60A5FA;--or:#F97316;--orl:#FFF4EB;--bg:#EFF6FF;--card:#DBEAFE;
+  --ink:#1a1d20;--gray:#64748B;--line:#E2E8F0;--sub:#F8FAFC}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:#fff;color:var(--ink);
+  font-family:"Pretendard","Malgun Gothic","맑은 고딕",-apple-system,sans-serif;
+  font-size:20px;line-height:1.7;word-break:keep-all;-webkit-font-smoothing:antialiased}
+
+#deck{position:fixed;inset:0;overflow:hidden}
+#track{display:flex;height:100%;transition:transform .32s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{flex:0 0 100vw;height:100vh;overflow-y:auto;padding:62px 7vw 96px;display:flex;flex-direction:column;justify-content:center}
+.si{width:100%;max-width:1060px;margin:auto}
+
+#bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--or));width:0;z-index:40;transition:width .32s}
+#top{position:fixed;top:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 7vw;font-size:13px;color:var(--gray);z-index:30;pointer-events:none}
+#count{font-variant-numeric:tabular-nums;font-weight:700;color:var(--blue)}
+#nav{position:fixed;bottom:22px;right:7vw;display:flex;gap:8px;z-index:30}
+#nav button,#tocBtn{font-family:inherit;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--ink);
+  padding:9px 17px;border-radius:8px;cursor:pointer;line-height:1.2}
+#nav button:hover,#tocBtn:hover{border-color:var(--blue);color:var(--blue)}
+#nav button[disabled]{opacity:.3;cursor:default;border-color:var(--line);color:var(--gray)}
+#tocBtn{position:fixed;bottom:22px;left:7vw;z-index:30}
+#toc{position:fixed;inset:0;background:#fff;z-index:50;display:none;padding:56px 7vw;overflow-y:auto}
+#toc.on{display:block}
+#toc .th{font-size:22px;font-weight:700;margin:0 0 22px}
+#toc .th span{font-size:13px;color:var(--gray);font-weight:400;margin-left:10px}
+#toc ol{list-style:none;padding:0;margin:0;column-width:290px;column-gap:40px}
+#toc button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);
+  font-family:inherit;font-size:15px;color:var(--ink);padding:10px 4px;cursor:pointer;line-height:1.35;break-inside:avoid}
+#toc button:hover{color:var(--blue);background:var(--bg)}
+#toc button b{color:var(--or);font-variant-numeric:tabular-nums;margin-right:12px;font-size:13px}
+#toc button.cur{color:var(--blue);font-weight:700}
+
+/* cover */
+.cover{background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 55%,#FFF4EB 100%)}
+.cover .eyebrow{display:inline-block;background:var(--or);color:#fff;font-weight:700;font-size:15px;letter-spacing:.04em;margin:0 0 18px;padding:5px 14px;border-radius:20px}
+.cover h1{font-size:56px;font-weight:800;margin:0 0 18px;line-height:1.2;letter-spacing:-.03em;color:var(--navy)}
+.cover h1 em{font-style:normal;color:var(--or)}
+.cover .sub{color:#334155;font-size:21px;margin:0 0 30px}
+.cover .meta{display:flex;flex-wrap:wrap;gap:10px}
+.cover .meta span{background:#fff;border:1px solid var(--card);border-radius:20px;padding:7px 16px;font-size:15px;color:var(--navy);font-weight:600}
+
+/* headings */
+.tags{display:flex;gap:9px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
+.tag{font-size:13.5px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.03em;line-height:1.2}
+.tag.study{background:var(--bg);border:1.5px solid var(--card);color:var(--blue)}
+.tag.do{background:var(--or);color:#fff}
+.tag.t{background:#F1F5F9;color:var(--gray)}
+.tm{display:inline-block;background:var(--sub);color:var(--gray);font-size:13.5px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid var(--line)}
+h2{font-size:34px;font-weight:800;margin:0 0 20px;padding:0 0 13px;border-bottom:3px solid var(--card);
+  line-height:1.3;letter-spacing:-.02em;color:var(--navy)}
+h2 small{display:block;font-size:17px;font-weight:500;color:var(--gray);margin-top:8px;letter-spacing:0}
+.slide.do h2{border-bottom-color:var(--or)}
+.slide.do{background:#FFFDFB}
+.slide.study{background:#FBFDFF}
+
+/* blocks */
+p{margin:12px 0}
+.lead{font-size:26px;font-weight:700;line-height:1.45;margin:6px 0 4px;letter-spacing:-.01em;color:var(--navy)}
+.lead em{font-style:normal;color:var(--or)}
+.note{color:var(--gray);font-size:17px;margin-top:14px}
+b{font-weight:700}
+.hi{background:linear-gradient(transparent 58%,#FED7AA 58%);font-weight:700;padding:0 2px}
+code,.mono{font-family:"D2Coding","Consolas",monospace;font-size:.9em;background:#F1F5F9;border-radius:4px;padding:1px 6px}
+ul.pts{list-style:none;padding:0;margin:16px 0}
+ul.pts li{position:relative;padding-left:32px;margin:14px 0;font-size:21px;line-height:1.6}
+ul.pts li:before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:50%;background:var(--sky)}
+ul.chk{list-style:none;padding:0;margin:16px 0}
+ul.chk li{position:relative;padding-left:40px;margin:13px 0;font-size:21px}
+ul.chk li:before{content:"☐";position:absolute;left:0;top:-3px;color:var(--or);font-size:26px}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:18px}
+th,td{border:1px solid var(--line);padding:12px 15px;text-align:left;vertical-align:top;line-height:1.5}
+th{background:var(--bg);font-weight:700;font-size:16px;color:var(--navy)}
+td.k{font-weight:700;color:var(--blue);white-space:nowrap;background:#FCFDFF}
+table.s{font-size:16px}
+table.s th,table.s td{padding:9px 12px}
+
+.box{border:1px solid var(--card);border-left:6px solid var(--blue);background:var(--bg);padding:18px 24px;margin:18px 0;border-radius:6px}
+.box .t{font-weight:800;margin:0 0 6px;color:var(--blue);font-size:19px}
+.box p{margin:6px 0;font-size:19px}
+.box ul{margin:8px 0;padding-left:22px}
+.box li{margin:6px 0;font-size:18px}
+.warn{border-left-color:#DC2626;background:#FEF2F2;border-color:#FECACA}
+.warn .t{color:#DC2626}
+.tip{border-left-color:var(--or);background:var(--orl);border-color:#FED7AA}
+.tip .t{color:#C2410C}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.cards.two{grid-template-columns:repeat(2,1fr)}
+.cards.four{grid-template-columns:repeat(4,1fr)}
+.card{border:1px solid var(--card);border-top:5px solid var(--blue);border-radius:8px;padding:18px 18px 16px;background:#fff}
+.card.or{border-top-color:var(--or)}
+.card .ic{font-size:32px;line-height:1;margin:0 0 8px}
+.card .h{font-weight:800;font-size:20px;margin:0 0 6px;color:var(--navy)}
+.card p{margin:0;font-size:16.5px;color:#475569;line-height:1.55}
+.card .n{display:inline-block;background:var(--or);color:#fff;font-weight:800;font-size:13px;border-radius:12px;padding:1px 10px;margin-bottom:8px}
+
+/* 순환 고리 */
+.loop{display:flex;align-items:stretch;gap:10px;margin:22px 0;flex-wrap:wrap}
+.loop .st{flex:1;min-width:150px;background:#fff;border:2px solid var(--card);border-radius:12px;padding:16px;text-align:center}
+.loop .st .ic{font-size:34px}
+.loop .st .h{font-weight:800;color:var(--navy);font-size:20px;margin:4px 0}
+.loop .st p{margin:0;font-size:15.5px;color:var(--gray);line-height:1.5}
+.loop .ar{align-self:center;color:var(--or);font-size:28px;font-weight:800}
+
+/* 따라하기 단계 */
+ol.steps{list-style:none;padding:0;margin:18px 0;counter-reset:st}
+ol.steps li{position:relative;padding-left:54px;margin:15px 0;font-size:21px;line-height:1.5;counter-increment:st;min-height:34px}
+ol.steps li:before{content:counter(st);position:absolute;left:0;top:0;width:34px;height:34px;
+  border-radius:50%;background:var(--or);color:#fff;font-size:16px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;line-height:1}
+ol.steps li .s{display:block;color:var(--gray);font-size:16px;margin-top:3px;line-height:1.5}
+
+/* 프롬프트 */
+.plabel{font-size:14.5px;font-weight:700;color:var(--blue);margin:16px 0 -4px;letter-spacing:.02em}
+.plabel i{font-style:normal;color:var(--gray);font-weight:400;margin-left:8px;font-size:14px}
+.prompt{position:relative;background:#F8FAFC;border:1px solid var(--line);border-left:4px solid var(--sky);border-radius:6px;
+  padding:16px 90px 16px 20px;margin:12px 0;font-size:18px;line-height:1.65;white-space:pre-wrap;color:#0F172A}
+.copy{position:absolute;top:10px;right:10px;font-family:inherit;font-size:12.5px;border:1px solid var(--line);
+  background:#fff;color:var(--gray);padding:5px 11px;border-radius:6px;cursor:pointer}
+.copy:hover{border-color:var(--blue);color:var(--blue)}
+.copy.ok{border-color:#16A34A;color:#16A34A}
+.qs .row{margin:0 0 10px}
+.qs .lb{font-weight:700;color:var(--navy);font-size:17px;margin:0 0 4px}
+.qs .lb i{font-style:normal;color:var(--gray);font-weight:400;font-size:15px;margin-left:8px}
+.qs .prompt{margin:0;padding:12px 90px 12px 18px;font-size:17px;line-height:1.55}
+
+/* 2단 레이아웃 */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.cols.wide{grid-template-columns:1.25fr 1fr}
+
+/* 완성 예시 · 데모 */
+.hook{font-size:24px;font-weight:800;color:var(--or);margin:0 0 6px}
+.demo{background:#fff;border:2px solid var(--card);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(37,99,235,.10)}
+.demo .bt{display:flex;gap:6px;margin:-6px 0 12px}
+.demo .bt i{width:11px;height:11px;border-radius:50%;background:#E2E8F0}
+.demo .bt i:first-child{background:#FCA5A5}.demo .bt i:nth-child(2){background:#FCD34D}.demo .bt i:nth-child(3){background:#86EFAC}
+.demo .bt span{margin-left:10px;font-size:12.5px;color:var(--gray);font-family:Consolas,monospace}
+.pin{display:flex;gap:12px;align-items:flex-start;margin:12px 0}
+.pin .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.pin .h{font-weight:800;color:var(--navy);font-size:19px}
+.pin p{margin:2px 0 0;font-size:16px;color:var(--gray);line-height:1.5}
+.ph{border:2px dashed var(--sky);border-radius:12px;background:var(--bg);color:var(--blue);text-align:center;padding:14px;font-size:14.5px;margin-top:12px}
+
+/* 작은 버튼 · 입력 */
+.btn{font-family:inherit;font-weight:700;font-size:16px;border:0;border-radius:10px;padding:10px 18px;cursor:pointer;background:var(--blue);color:#fff}
+.btn.or{background:var(--or)}
+.btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--card)}
+.btn:active{transform:translateY(1px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;border:1.5px solid var(--card);background:#fff;border-radius:20px;padding:6px 13px;font-size:15.5px;color:#334155}
+.chips input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.fld{margin:0 0 11px}
+.fld .lb{display:block;font-size:14.5px;font-weight:800;color:var(--navy);margin:0 0 4px}
+.fld .lb i{font-style:normal;font-weight:400;color:var(--gray);margin-left:6px}
+.fld input[type=text]{width:100%;font-family:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:8px;padding:8px 11px;background:#fff}
+.fld input[type=text]:focus{outline:0;border-color:var(--sky);box-shadow:0 0 0 3px #DBEAFE}
+.out{position:relative;background:#0F172A;color:#E2E8F0;border-radius:12px;padding:16px 18px;font-size:16px;line-height:1.65;white-space:pre-wrap;min-height:200px}
+.out .copy{background:#1E293B;color:#CBD5E1;border-color:#334155}
+.out .copy.ok{color:#86EFAC;border-color:#86EFAC}
+.mini{font-size:14px;color:var(--gray)}
+
+/* 선생님 슬라이드 */
+.teacher{background:#F8FAFC}
+.teacher h2{border-bottom-color:#CBD5E1;color:#334155}
+
+@media(max-width:900px){
+  body{font-size:17px}
+  .slide{padding:58px 5vw 90px;justify-content:flex-start}
+  .cover h1{font-size:34px} h2{font-size:25px} .lead{font-size:20px}
+  ul.pts li,ul.chk li,ol.steps li{font-size:17px}
+  table{font-size:14px} th,td{padding:8px 9px} table.s{font-size:13px}
+  .prompt{font-size:15px}
+  .cards,.cards.four,.cards.two,.cols,.cols.wide{grid-template-columns:1fr}
+  .loop .ar{display:none}
+  #top,#toc{padding-left:5vw;padding-right:5vw}
+  #nav{right:5vw} #tocBtn{left:5vw}
+}
+@media print{
+  html,body{height:auto;overflow:visible}
+  #bar,#top,#nav,#tocBtn,#toc,.copy{display:none!important}
+  #deck{position:static}#track{display:block;transform:none!important}
+  .slide{height:auto;page-break-after:always;padding:0 0 20px;display:block}
+  .si{max-width:none}
+  @page{size:A4 landscape;margin:13mm}
+}
+
+/* ==== 버셀 따라하기 플레이어 (도민 vercel-help 이식) ==== */
+.vp{display:grid;grid-template-columns:minmax(260px,1fr) 1.35fr;gap:22px;align-items:start}
+.vcap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-height:150px}
+.vcap .no{display:inline-block;background:var(--or);color:#fff;font-weight:800;border-radius:14px;padding:1px 11px;font-size:14px;margin-right:6px}
+.vcap .t{font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--navy)}
+.vcap .d{font-size:16.5px;color:#475569;margin-top:6px;line-height:1.55}
+.vcap .d b{color:var(--ink)}
+.vcap .w{display:block;color:#DC2626;font-weight:700;margin-top:6px;font-size:15.5px}
+.vbar{height:5px;background:#E2E8F0;border-radius:3px;margin:10px 0;overflow:hidden}
+.vbar span{display:block;height:100%;width:0;background:var(--or)}
+.vctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vctrl button{font:inherit;font-weight:800;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:15px}
+.vctrl button.main{background:var(--blue);color:#fff;border-color:var(--blue);min-width:96px}
+.vdots{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.vdots i{width:14px;height:14px;border-radius:50%;background:#CBD5E1;cursor:pointer}
+.vdots i.on{background:var(--or)}
+.vstage{background:#F8FAFC;border:1px solid var(--line);border-radius:12px;height:64vh;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;padding:8px}
+.vframe{position:relative;width:420px;max-width:100%}
+.vframe img{width:100%;display:block;border-radius:4px}
+.vcursor{position:absolute;width:30px;height:30px;left:50%;top:110%;transform:translate(-4px,-3px);transition:left .9s cubic-bezier(.4,0,.2,1),top .9s cubic-bezier(.4,0,.2,1);z-index:5;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.vring{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border:4px solid var(--or);border-radius:50%;opacity:0;z-index:4;pointer-events:none}
+.vring.go{animation:vring 1.4s ease-out infinite}
+@keyframes vring{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.vbox{position:absolute;border:4px solid var(--or);border-radius:8px;background:rgba(249,115,22,.08);opacity:0;transition:opacity .4s;z-index:3;pointer-events:none}
+.vbox.on{opacity:1}
+.vbox.x{border-color:#94A3B8;background:rgba(0,0,0,.04)}
+.vtag{position:absolute;background:var(--or);color:#fff;font-weight:800;font-size:13px;border-radius:6px;padding:2px 8px;white-space:nowrap;opacity:0;transition:opacity .4s;z-index:6;pointer-events:none}
+.vtag.on{opacity:1}
+.vtag.gray{background:#64748B}
+.vchip{position:absolute;display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--navy);border-radius:8px;padding:6px 10px;font-weight:800;font-size:14px;z-index:6;box-shadow:0 6px 16px rgba(0,0,0,.18);transition:left 1.4s cubic-bezier(.4,0,.2,1),top 1.4s cubic-bezier(.4,0,.2,1),opacity .3s;transform:translate(-50%,-50%);opacity:0;pointer-events:none}
+.vchip.on{opacity:1}
+.vtips{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vtip{border-radius:10px;padding:12px 15px;font-size:15.5px;line-height:1.55}
+.vtip b.h{display:block;font-size:16.5px;margin-bottom:3px}
+.vtip.red{background:#FEF2F2;border:1px solid #FECACA}
+.vtip.blue{background:var(--bg);border:1px solid var(--card)}
+.vtip.green{background:#F0FDF4;border:1px solid #BBF7D0}
+.vtip img{width:100%;max-width:240px;display:block;border:1px solid var(--line);border-radius:6px;margin-top:8px}
+@media(max-width:900px){.vp,.vtips{grid-template-columns:1fr}.vstage{height:52vh}}
+@media (prefers-reduced-motion:reduce){.vcursor,.vchip{transition:none}.vring.go{animation:none;opacity:1}}
+/* 한 끼 계산기 데모 */
+.bk-h{font-size:21px;font-weight:800;color:#166534;margin:0 0 2px}
+.bk-s{font-size:13.5px;color:var(--gray);margin:0 0 10px}
+.bk-foods{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.bk-foods button{font-family:inherit;border:1.5px solid #BBF7D0;background:#F0FDF4;border-radius:10px;padding:7px 4px;cursor:pointer;font-size:13.5px;line-height:1.3;color:#14532D}
+.bk-foods button b{display:block;font-size:24px;line-height:1.2}
+.bk-foods button:hover{border-color:#22C55E}
+.bk-foods button:active{transform:scale(.95)}
+.bk-list{min-height:30px;margin:10px 0 6px;font-size:15px;color:#334155}
+.bk-list span{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1px 9px;margin:2px 3px 2px 0}
+.bk-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.bk-tot div{background:var(--bg);border-radius:10px;padding:7px 8px;text-align:center;font-size:13px;color:var(--gray)}
+.bk-tot b{display:block;font-size:22px;color:var(--navy);font-variant-numeric:tabular-nums}
+.bk-msg{margin-top:9px;border-radius:10px;padding:9px 12px;font-weight:700;font-size:16px;background:#F1F5F9;color:#334155;min-height:44px}
+.bk-msg.low{background:#FEF9C3;color:#854D0E}.bk-msg.ok{background:#DCFCE7;color:#166534}.bk-msg.hi{background:#FEE2E2;color:#991B1B}
+.bk-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:#94A3B8}
+.bk-foot button{font-family:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 10px;cursor:pointer}
+.bk-trace{background:#0F172A;color:#E2E8F0;border-radius:10px;padding:10px 12px;font-family:"D2Coding",Consolas,monospace;font-size:13.5px;line-height:1.6;margin-top:9px;min-height:96px;white-space:pre-wrap}
+.bk-trace .c{color:#64748B}.bk-trace .v{color:#FDE68A}.bk-trace .k{color:#93C5FD}
+.bk-trace .new{animation:flash 1s}
+@keyframes flash{0%{background:#334155}100%{background:transparent}}
+/* 데이터의 길 */
+.road{display:flex;flex-direction:column;gap:6px}
+.rd{position:relative;background:linear-gradient(90deg,#2563EB,#60A5FA);color:#fff;border-radius:10px;padding:9px 16px;font-size:16px}
+.rd b{font-size:19px;margin-right:8px}
+.rd span{float:right;font-size:13.5px;opacity:.9;margin-top:3px}
+.rd:not(:last-child):after{content:"▼";position:absolute;left:50%;bottom:-13px;color:var(--or);font-size:12px;z-index:2}
+
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="top"><span>남원중학교 방과후 · 35~36차시 바이브코딩 ② 내 생활을 돕는 웹앱 만들기</span><span id="count"></span></div>
+<div id="deck"><div id="track">
+
+<section class="slide cover" data-t="바이브코딩 ② 내 생활을 돕는 웹앱 만들기"><div class="si">
+<p class="eyebrow">남원중학교 방과후 · 35~36차시 · 90분</p>
+<h1>바이브코딩 ②<br>내 생활을 돕는 <em>웹앱 만들기</em></h1>
+<p class="sub">진짜 앱은 <b>입력 → 계산 → 판단</b>으로 움직여요. 내 앱의 설계도를 그리고,<br>AI에게 말로 주문해 만든 뒤 <b>버셀(Vercel)</b>로 세상에 공개합니다.</p>
+<div class="meta"><span>📱 결과물: 내 웹앱 주소 ○○○.vercel.app</span><span>🤖 도구: Gemini Canvas · Vercel</span><span>🙌 처음 오는 친구도 OK</span></div>
+</div></section>
+
+<section class="slide study" data-t="완성 예시 먼저 보기"><div class="si">
+<div class="tags"><span class="tag study">완성 예시</span><span class="tm">0~2분</span></div>
+<div class="cols wide">
+  <div class="demo">
+    <div class="bt"><i></i><i></i><i></i><span>https://my-meal.vercel.app</span></div>
+    <div class="bk" id="bkA"></div>
+  </div>
+  <div>
+    <p class="hook">오늘 수업 끝나면 이런 앱이 완성돼요! 👇</p>
+    <p class="mini" style="margin:0 0 6px">← 음식을 눌러 보세요. AI에게 말로 주문해 만든 "오늘의 한 끼 계산기"예요.</p>
+    <div class="pin"><div class="n">1</div><div><div class="h">입력 — 사용자가 정보를 넣어요</div><p>먹은 음식을 고르기 (용돈 앱이면 쓴 돈, 공부 앱이면 공부 시간)</p></div></div>
+    <div class="pin"><div class="n">2</div><div><div class="h">계산 — 앱이 알아서 더해요</div><p>열량 · 탄수화물 · 단백질을 자동으로 합산</p></div></div>
+    <div class="pin"><div class="n">3</div><div><div class="h">판단 — 기준과 비교해 알려 줘요</div><p>"조금 부족해요 / 알맞아요 / 많이 먹었어요" 한마디 조언</p></div></div>
+  </div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="오늘의 미션 3가지"><div class="si">
+<div class="tags"><span class="tag study">오늘의 미션</span><span class="tm">2~3분</span></div>
+<h2>오늘의 미션 3가지</h2>
+<div class="cards">
+  <div class="card"><span class="n">미션 1 · 1차시</span><div class="ic">🔍</div><div class="h">앱 뜯어보기</div><p>잘 만든 앱이 무엇을 입력받고, 어떻게 계산하고, 무엇을 보여 주는지 알아내기</p></div>
+  <div class="card or"><span class="n">미션 2 · 1차시</span><div class="ic">📝</div><div class="h">설계하고 만들기</div><p>주제를 골라 설계표를 채우고, Canvas로 내 웹앱을 만들어 테스트</p></div>
+  <div class="card"><span class="n">미션 3 · 2차시</span><div class="ic">🚀</div><div class="h">업그레이드 → 공개</div><p>저장·그래프 같은 기능을 더하고, 버셀 주소를 받아 친구와 서로 써 보기</p></div>
+</div>
+<table class="s"><thead><tr><th style="width:12%">차시</th><th style="width:15%">시간</th><th>무엇을</th></tr></thead><tbody>
+<tr><td class="k" rowspan="3">1차시</td><td>0~12분</td><td>이론 — 앱 뜯어보기(입력·처리·출력) · 데이터와 CRUD · 바구니로 배우는 변수·반복·조건</td></tr>
+<tr><td>12~22분</td><td>STEP 1 — 주제 고르기 → 웹앱 설계표 채우기</td></tr>
+<tr><td>22~45분</td><td>STEP 1 — Canvas로 만들기 → 버그 사냥 테스트</td></tr>
+<tr><td class="k" rowspan="3">2차시</td><td>45~50분</td><td>이론 — 데이터를 다루는 사람의 약속 (사실 확인 · 개인정보)</td></tr>
+<tr><td>50~68분</td><td>STEP 2 — 업그레이드 메뉴판으로 기능 더하기</td></tr>
+<tr><td>68~90분</td><td>STEP 3 — index.html 저장 → 버셀 주소 받기 → 서로 써 보기 · 투표</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="slide study" data-t="이론 ① 앱 뜯어보기 — 입력 · 처리 · 출력"><div class="si">
+<div class="tags"><span class="tag study">이론 ①</span><span class="tm">1차시 · 3~6분</span></div>
+<h2>앱 뜯어보기 — 모든 앱은 입력 · 처리 · 출력<small>잘 만든 앱을 분석하면, 내 앱을 설계할 수 있어요</small></h2>
+<div class="loop">
+  <div class="st"><div class="ic">⌨</div><div class="h">입력</div><p>사용자에게<br>어떤 정보를 받을까?</p></div><div class="ar">→</div>
+  <div class="st"><div class="ic">🧠</div><div class="h">처리</div><p>받은 정보로<br>무엇을 계산·판단할까?</p></div><div class="ar">→</div>
+  <div class="st"><div class="ic">📊</div><div class="h">출력</div><p>어떤 결과를<br>보여 주고 도와줄까?</p></div>
+</div>
+<p class="plabel">실제 앱에 들어 있는 데이터를 맞혀 보세요</p>
+<div class="cards" style="margin-top:12px">
+  <div class="card"><div class="ic">▶</div><div class="h">유튜브</div><p>영상 제목 · 영상 파일 · 조회수 · 댓글 내용 · 업로드 날짜</p></div>
+  <div class="card or"><div class="ic">🛵</div><div class="h">배달 앱</div><p>가게 이름 · 메뉴 가격 · 리뷰 별점 · 사용자 집 주소</p></div>
+  <div class="card"><div class="ic">📒</div><div class="h">스프레드시트</div><p>행과 열로 정리된 표 — 이것도 모두 <b>데이터</b>예요</p></div>
+</div>
+<p class="note"><b>데이터</b> = 앱이 사용하는 정보. 앱은 데이터를 받아서(입력) → 다루고(처리) → 보여 줘요(출력).</p>
+</div></section>
+
+<section class="slide study" data-t="이론 ② 데이터는 어디에서 어디로? (CRUD)"><div class="si">
+<div class="tags"><span class="tag study">이론 ②</span><span class="tm">1차시 · 6~9분</span></div>
+<h2>데이터는 어디에서 어디로?<small>데이터를 다루는 4대 원칙 CRUD와, 데이터가 지나가는 길</small></h2>
+<div class="cols">
+  <div>
+    <table class="s"><thead><tr><th style="width:34%">CRUD</th><th>인스타그램으로 보면</th></tr></thead><tbody>
+      <tr><td class="k">Create 만들기</td><td>새 게시물 올리기</td></tr>
+      <tr><td class="k">Read 보기</td><td>피드 넘겨 보기</td></tr>
+      <tr><td class="k">Update 고치기</td><td>글 수정 · ♥ 숫자 오르기</td></tr>
+      <tr><td class="k">Delete 지우기</td><td>게시물 삭제</td></tr>
+    </tbody></table>
+    <p class="note">내 앱에서는? 기록 <b>추가</b> · 목록 <b>보기</b> · 기록 <b>수정</b> · 기록 <b>삭제</b> 버튼!</p>
+  </div>
+  <div>
+    <div class="road">
+      <div class="rd"><b>화면</b> UI · 프론트엔드<span>사용자가 보고 누르는 곳</span></div>
+      <div class="rd"><b>통로</b> API · 네트워크<span>데이터가 오가는 길</span></div>
+      <div class="rd"><b>두뇌</b> 백엔드 · 서버<span>계산하고 판단하는 곳</span></div>
+      <div class="rd"><b>창고</b> 데이터베이스<span>기록을 보관하는 곳</span></div>
+    </div>
+    <div class="box tip" style="margin-top:12px"><p class="t">💡 오늘 우리 앱은 간단 버전</p><p>화면 + 두뇌(JavaScript)가 <b>index.html 한 파일</b>에, 창고는 <b>브라우저의 로컬 스토리지</b>. 그래서 내 기록은 <b>내 기기에만</b> 저장돼요.</p></div>
+  </div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="이론 ③ 바구니로 배우는 변수 · 반복 · 조건"><div class="si">
+<div class="tags"><span class="tag study">이론 ③</span><span class="tm">1차시 · 9~12분</span></div>
+<h2>바구니로 배우는 변수 · 반복 · 조건<small>음식을 하나씩 눌러 보세요. 앱의 두뇌 속에서 무슨 일이 일어나는지 보여요</small></h2>
+<div class="cols">
+  <div class="demo"><div class="bk" id="bkB"></div></div>
+  <div>
+    <div class="pin"><div class="n" style="background:#A855F7">변</div><div><div class="h">변수 = 이름표 붙은 빈 바구니 🧺</div><p><code>total_cal = 0</code> 처음엔 0으로 시작!</p></div></div>
+    <div class="pin"><div class="n" style="background:var(--blue)">반</div><div><div class="h">반복 = 음식마다 똑같이 더하기 🔁</div><p><code>total_cal = total_cal + food_cal</code><br>음식이 몇 개든 다 꺼낼 때까지 반복</p></div></div>
+    <div class="pin"><div class="n" style="background:var(--or)">조</div><div><div class="h">조건 = 기준과 비교해 판단 ⚖</div><p><code>만약 total_cal &lt; 500 이라면 → "조금 부족해요"</code></p></div></div>
+    <div class="box" style="margin-top:10px"><p class="t">변수 이름 짓는 규칙</p><p>영문 소문자 · 뜻이 보이게 · 띄어쓰기 대신 <code>_</code> → <code>total_protein</code>, <code>pocket_money</code><br><span class="mini">외우지 않아도 돼요. 우리는 AI에게 써 달라고 부탁할 거니까요!</span></p></div>
+  </div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 1 — 주제 고르기"><div class="si">
+<div class="tags"><span class="tag do">STEP 1</span><span class="tm">1차시 · 12~15분</span></div>
+<h2>내 생활의 어떤 문제를 해결해 볼까?<small>하나를 골라요. 친구들과 다른 주제여도 좋아요 — 입력 · 계산 · 판단이 들어가면 OK</small></h2>
+<div class="cards">
+  <div class="card"><div class="ic">🍱</div><div class="h">식단 매니저</div><p><b>입력</b> 먹은 음식 · <b>계산</b> 열량 합 · <b>판단</b> 부족/적당/과다</p></div>
+  <div class="card or"><div class="ic">💰</div><div class="h">용돈 기록장</div><p><b>입력</b> 쓴 돈·항목 · <b>계산</b> 남은 돈 · <b>판단</b> 예산 초과 경고</p></div>
+  <div class="card"><div class="ic">⏰</div><div class="h">공부 타이머</div><p><b>입력</b> 과목·시간 · <b>계산</b> 과목별 합계 · <b>판단</b> 목표 달성 축하</p></div>
+  <div class="card or"><div class="ic">📚</div><div class="h">독서 기록장</div><p><b>입력</b> 책·쪽수 · <b>계산</b> 이번 달 쪽수 · <b>판단</b> 목표까지 남은 쪽</p></div>
+  <div class="card"><div class="ic">🏃</div><div class="h">운동 챌린지</div><p><b>입력</b> 줄넘기·걸음 수 · <b>계산</b> 연속 일수 · <b>판단</b> 배지 주기</p></div>
+  <div class="card or"><div class="ic">💧</div><div class="h">물·잠 기록</div><p><b>입력</b> 마신 컵·잔 시간 · <b>계산</b> 하루 합 · <b>판단</b> 부족 알림</p></div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 1 — 웹앱 설계표 (주문서 자동 완성)"><div class="si">
+<div class="tags"><span class="tag do">STEP 1</span><span class="tm">1차시 · 15~22분</span><span class="tag t">실습 페이지</span></div>
+<h2>나만의 웹앱 설계표<small>칸을 채우면 오른쪽에 AI 주문서가 완성돼요 → [복사] → 제미나이(Canvas 켜기)에 붙여넣기</small></h2>
+<div class="cols">
+  <form id="af" autocomplete="off" onsubmit="return false">
+    <div class="fld"><span class="lb">주제</span><div class="chips">
+      <label><input type="radio" name="topic" value="식단 매니저"><span>🍱 식단</span></label><label><input type="radio" name="topic" value="용돈 기록장"><span>💰 용돈</span></label><label><input type="radio" name="topic" value="공부 타이머"><span>⏰ 공부</span></label><label><input type="radio" name="topic" value="독서 기록장"><span>📚 독서</span></label><label><input type="radio" name="topic" value="운동 챌린지"><span>🏃 운동</span></label><label><input type="radio" name="topic" value="물·잠 기록"><span>💧 물·잠</span></label></div></div>
+    <div class="cols" style="gap:10px">
+      <div class="fld"><span class="lb">해결할 문제</span><input type="text" name="problem" placeholder="예: 아침을 자주 거른다"></div>
+      <div class="fld"><span class="lb">누구를 위해</span><input type="text" name="who" placeholder="예: 나 같은 중학생"></div>
+    </div>
+    <div class="fld"><span class="lb">① 입력 <i>사용자가 넣을 정보</i></span><input type="text" name="input" placeholder="예: 날짜, 아침·점심·저녁에 먹은 음식"></div>
+    <div class="fld"><span class="lb">② 계산 <i>앱이 더하거나 셀 것</i></span><input type="text" name="calc" placeholder="예: 하루 총 열량과 단백질"></div>
+    <div class="cols" style="gap:10px">
+      <div class="fld"><span class="lb">③ 판단 — 만약</span><input type="text" name="cif" placeholder="예: 총 열량이 1500kcal보다 적으면"></div>
+      <div class="fld"><span class="lb">이렇게 안내</span><input type="text" name="cthen" placeholder="예: 간식으로 우유를 추천해요"></div>
+    </div>
+    <div class="fld"><span class="lb">결과 화면에 보여 줄 것</span><input type="text" name="show" placeholder="예: 영양 분석 결과, 날짜별 그래프"></div>
+    <div class="fld"><span class="lb">분위기</span><div class="chips">
+      <label><input type="radio" name="mood" value="귀여운"><span>귀여운</span></label><label><input type="radio" name="mood" value="건강하고 상쾌한"><span>건강한</span></label><label><input type="radio" name="mood" value="심플하고 깔끔한"><span>심플한</span></label><label><input type="radio" name="mood" value="밝고 알록달록한"><span>밝은</span></label><label><input type="radio" name="mood" value="게임 같은"><span>게임 같은</span></label></div></div>
+    <button type="button" class="btn ghost" id="afx" style="font-size:14px;padding:7px 13px">고른 주제 예시로 채우기</button> <button type="button" class="btn ghost" id="afc" style="font-size:14px;padding:7px 13px">지우기</button>
+  </form>
+  <div>
+    <p class="plabel" style="margin-top:0">완성된 주문서</p>
+    <div class="out" style="margin-top:10px"><button class="copy" type="button" data-from="aout">복사</button><span id="aout"></span></div>
+    <p class="mini">적은 내용은 이 컴퓨터에만 저장돼요. 실명·몸무게 같은 진짜 개인정보는 쓰지 마세요.</p>
+  </div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 1 — 만들고 버그 사냥하기"><div class="si">
+<div class="tags"><span class="tag do">STEP 1</span><span class="tm">1차시 · 22~45분</span></div>
+<h2>만들고, 버그 사냥하기 🐞<small>앱이 나왔다고 끝이 아니에요. 개발자는 일부러 이상한 값을 넣어 보며 테스트해요</small></h2>
+<div class="cols">
+  <div>
+    <ol class="steps">
+      <li><b>gemini.google.com</b> → [도구] → <b>Canvas</b> 켜기</li>
+      <li>설계표 주문서 붙여넣고 보내기 → 오른쪽 미리보기 확인</li>
+      <li>오른쪽 <b>버그 사냥 체크리스트</b>로 테스트</li>
+      <li>이상한 점은 <b>[언제] + [무엇이] + [어떻게 되는데] → [어떻게]</b>로 고쳐 달라고 하기</li>
+    </ol>
+    <div class="prompt"><button class="copy" type="button">복사</button>음식을 3개 넣었는데 총 열량이 2개만 더해진 값으로 나와. 넣은 음식을 모두 더하게 고쳐 줘.</div>
+  </div>
+  <div class="box"><p class="t">🐞 버그 사냥 체크리스트</p><ul class="chk" style="margin:6px 0">
+    <li style="font-size:17px">계산이 맞나? — <b>계산기</b>로 직접 더해서 비교</li>
+    <li style="font-size:17px">기준값 딱 그 숫자를 넣으면? (예: 정확히 500)</li>
+    <li style="font-size:17px"><b>빈칸</b> · <b>0</b> · <b>-5</b> 를 넣으면?</li>
+    <li style="font-size:17px">새로고침(F5)해도 기록이 남나?</li>
+    <li style="font-size:17px">기록을 <b>지우는</b> 버튼이 있나? (CRUD의 D!)</li>
+  </ul><p class="mini">버그를 찾으면 "버그 발견!" 외치기 — 가장 많이 찾은 사람이 오늘의 버그 헌터 🏅</p></div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="이론 ④ 데이터를 다루는 사람의 약속"><div class="si">
+<div class="tags"><span class="tag study">이론 ④</span><span class="tm">2차시 · 45~50분</span></div>
+<h2>데이터를 다루는 사람의 약속<small>앱을 만드는 사람은 사용자의 정보를 책임지는 사람이에요</small></h2>
+<div class="cards">
+  <div class="card"><div class="ic">✅</div><div class="h">사실 확인</div><p>AI가 만든 숫자(영양 정보, 가격)는 <b>틀릴 수 있어요</b>. 공공기관(go.kr) 자료와 <b>2곳 이상</b> 비교하기</p></div>
+  <div class="card or"><div class="ic">🔒</div><div class="h">개인정보 보호</div><p>실명 · 주소 · 전화번호 · 몸무게는 넣지 않기. 테스트는 <b>'학생 A' 같은 가상 데이터</b>로</p></div>
+  <div class="card"><div class="ic">⚖</div><div class="h">공정성 · 배려</div><p>"살쪘다" 같은 말 대신 누구도 상처받지 않는 <b>안내 문구</b>로. 누구나 쓸 수 있는 앱 디자인</p></div>
+</div>
+<div class="box warn"><p class="t">⚠ 기억하세요</p><p>AI 채팅창에 입력한 내용은 <b>AI 학습에 쓰일 수 있어요</b>. 버셀에 올린 앱은 <b>주소를 아는 누구나</b> 볼 수 있어요. 그래서 우리는 <b>가상의 데이터</b>로 안전하게 개발합니다.</p></div>
+</div></section>
+
+<section class="slide do" data-t="STEP 2 — 업그레이드 메뉴판"><div class="si">
+<div class="tags"><span class="tag do">STEP 2</span><span class="tm">2차시 · 50~68분</span></div>
+<h2>업그레이드 메뉴판<small>제미나이 대화창이 닫혔다면? 1차시에 복사한 주문서를 다시 붙여넣고 시작하면 돼요</small></h2>
+<div class="qs">
+  <div class="row"><p class="lb">💾 날짜별 기록 저장<i>Create · Read</i></p><div class="prompt"><button class="copy" type="button">복사</button>입력한 기록을 날짜별로 브라우저 로컬 스토리지에 저장해 줘. 새로고침해도 남아 있고, 날짜를 바꾸면 그날 기록이 보이게 해 줘.</div></div>
+  <div class="row"><p class="lb">📈 그래프로 보기<i>출력</i></p><div class="prompt"><button class="copy" type="button">복사</button>저장된 기록으로 날짜별 변화 그래프를 그려 줘. 외부 파일 없이 HTML 안에서 그려지게 해 줘.</div></div>
+  <div class="row"><p class="lb">🗑 고치고 지우기<i>Update · Delete</i></p><div class="prompt"><button class="copy" type="button">복사</button>각 기록 옆에 [수정]과 [삭제] 버튼을 만들어 줘. 삭제하기 전에 "정말 지울까요?"라고 물어봐 줘.</div></div>
+  <div class="row"><p class="lb">🎯 목표 설정<i>조건</i></p><div class="prompt"><button class="copy" type="button">복사</button>사용자가 목표값을 직접 정할 수 있게 해 줘. 목표를 달성하면 축하 애니메이션과 함께 "목표 달성! 🎉"을 크게 보여 줘.</div></div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 3 — 웹앱을 index.html 파일로 저장"><div class="si">
+<div class="tags"><span class="tag do">STEP 3</span><span class="tm">2차시 · 68~72분</span></div>
+<h2>웹앱을 <code>index.html</code> 파일로 저장하기<small>버셀에 올리려면 Canvas 안의 앱을 내 컴퓨터 파일로 꺼내야 해요</small></h2>
+<div class="cols">
+  <ol class="steps">
+    <li>바탕화면에 <b>my-app</b> 폴더 만들기<span class="s">마우스 오른쪽 → 새로 만들기 → 폴더 (영어 이름!)</span></li>
+    <li>Canvas 오른쪽 위 <b>[코드]</b> 보기 → 코드 칸 클릭 → <b>Ctrl + A</b> → <b>Ctrl + C</b></li>
+    <li><b>메모장</b> 열고 Ctrl + V 붙여넣기</li>
+    <li>[파일] → <b>다른 이름으로 저장</b> → my-app 폴더 → 이름 <b>index.html</b><span class="s">파일 형식: <b>모든 파일</b> · 인코딩: <b>UTF-8</b></span></li>
+    <li>index.html을 <b>더블클릭</b> → 크롬에서 앱이 열리면 성공!</li>
+  </ol>
+  <div>
+    <div class="box warn"><p class="t">⚠ index.html.txt 가 되어 버렸어요</p><p>탐색기 [보기] → <b>파일 확장명</b> 켜고 이름에서 .txt 지우기</p></div>
+    <div class="box warn"><p class="t">⚠ 한글이 깨져요</p><p>저장할 때 인코딩을 <b>UTF-8</b>로 다시 저장</p></div>
+    <div class="box"><p class="t">왜 이름이 꼭 index.html?</p><p>웹사이트의 <b>첫 페이지(현관문)</b>라는 약속된 이름이에요. 이름이 다르면 주소를 열었을 때 빈 화면이 나와요.</p></div>
+  </div>
+</div>
+</div></section>
+
+
+<section class="slide do" data-t="STEP 3 — 버셀로 내 주소 받기"><div class="si"><div class="tags"><span class="tag do">STEP 3</span><span class="tm">2차시 · 72~82분</span></div><h2>버셀(Vercel)로 내 주소 받기<small>구글로 가입하고 → <b>my-app 폴더</b>를 끌어다 놓으면 → <b>○○○.vercel.app</b> 주소가 생깁니다. 화면이 저절로 넘어가요.</small></h2>
+<div class="vp" id="vp" tabindex="-1">
+  <div>
+    <div class="vcap" id="vcap"></div>
+    <div class="vbar"><span id="vbar"></span></div>
+    <div class="vctrl">
+      <button id="vprev" type="button">◀ 이전</button>
+      <button id="vplay" class="main" type="button">⏸ 멈춤</button>
+      <button id="vnext" type="button">다음 ▶</button>
+    </div>
+    <div class="vdots" id="vdots"></div>
+    <p class="mini" style="margin-top:14px">점을 누르면 그 단계로 바로 갑니다. 화면은 Vercel 2026년 10월 기준이에요.</p>
+  </div>
+  <div class="vstage" id="vstage">
+    <div class="vframe" id="vframe">
+      <img id="vshot" alt="">
+      <svg class="vcursor" id="vcursor" viewBox="0 0 24 24"><path d="M3 2l17 9-7.5 1.8L9 20z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <div class="vring" id="vring"></div>
+      <div class="vchip" id="vchip">📁 my-app</div>
+    </div>
+  </div>
+</div></div></section>
+
+<section class="slide do" data-t="STEP 3 — 버셀, 막히면 여기를 보세요"><div class="si"><div class="tags"><span class="tag do">STEP 3</span><span class="tm">2차시 · 72~82분</span></div><h2>버셀, 막히면 여기를 보세요</h2>
+<div class="vtips">
+  <div class="vtip red"><b class="h">⚠ "Social Account is not yet connected…" 가 떠요</b>
+    <b>Log in</b>(로그인)을 눌러서 그래요. 처음이면 가입부터 해야 합니다. 노란 칸의 <b>Sign up?</b>을 누르고 다시 <b>Continue with Google</b>.
+    <img src="img/vercel-err.jpg" alt="Social Account is not yet connected 안내 화면"></div>
+  <div>
+    <div class="vtip red" style="margin-bottom:12px"><b class="h">⚠ 팀 이름이 안 써지고 Continue가 안 눌려요</b>
+      한글로 쳐서 그래요. 키보드 <b>한/영</b> 키로 바꾸고 <b>영어</b>로 쓰세요. 예) <code>kim</code></div>
+    <div class="vtip red"><b class="h">⚠ Pro / Hobby 고르는 화면</b>
+      처음엔 <b>Pro(유료 체험)</b>에 체크되어 있어요. 꼭 아래 <b>personal projects · Hobby</b>를 누르세요.</div>
+  </div>
+  <div class="vtip blue"><b class="h">💡 내 주소는 짧은 쪽입니다</b>
+    프로젝트 화면 <b>Domains</b> 아래 <code>이름.vercel.app</code>이 내 주소예요. 위쪽의 긴 주소(<code>이름-abc123-….vercel.app</code>)는 보내지 마세요.</div>
+  <div class="vtip blue"><b class="h">💡 Project Name = 주소</b>
+    여기 쓴 이름이 주소 앞부분이 됩니다. <b>영어 소문자와 - 만</b> 쓰세요. 이미 누가 쓰는 이름이면 뒤에 엉뚱한 단어가 붙어요 (예: test → <code>test-peach-xi-87</code>). 그래도 괜찮아요 — Domains에 보이는 그대로가 내 주소입니다.</div>
+  <div class="vtip green"><b class="h">📋 내 주소 복사하는 법</b>
+    ① <b>Domains</b> 아래 주소 옆 <b>↗</b>를 눌러 내 사이트 열기 → ② 새로 열린 창의 <b>주소창</b>을 한 번 누르기 → ③ <b>Ctrl + C</b> (복사) → ④ 카톡·패들렛에 <b>Ctrl + V</b> (붙여넣기). 주소는 <code>https://○○○.vercel.app</code> 모양이면 맞아요.</div>
+  <div class="vtip green"><b class="h">✏ 고친 파일을 다시 올리려면</b>
+    vercel.com 로그인 → <b>내 프로젝트</b> 화면에 고친 폴더를 <b>아무 데나 끌어다 놓으면</b> 같은 주소로 바뀝니다. <b>vercel.com/drop</b>에 다시 올리면 새 주소가 생겨요.</div>
+</div>
+<div class="box warn" style="margin-top:14px"><p class="t">✓ 마지막 확인</p><p>내 주소를 카톡 <b>나와의 채팅</b>으로 보내고 <b>폰</b>에서 눌러 보세요. 로그인 없이 내 앱이 보이면 성공! 올린 자료는 주소를 아는 <b>누구나</b> 볼 수 있으니 전화번호·집 주소 같은 개인정보는 넣지 마세요.</p></div>
+</div></section>
+
+
+<section class="slide do" data-t="서로 써 보고 투표하기"><div class="si">
+<div class="tags"><span class="tag do">공유</span><span class="tm">2차시 · 82~88분</span></div>
+<h2>제작한 웹앱 공유하기 — 서로 써 보기!</h2>
+<div class="cols">
+  <ol class="steps">
+    <li>패들렛 <b>35~36차시</b> 칸에 <b>앱 이름 + 한 줄 소개 + 내 주소</b> 올리기</li>
+    <li>친구 앱을 열어 <b>가상 데이터</b>를 넣고 직접 써 보기 (한 앱 2분)</li>
+    <li>댓글 두 줄 — <b>편리했던 점 하나 + 이런 기능이 있으면 좋겠다 하나</b></li>
+    <li>투표 — <b>가장 쓸모 있는 · 가장 예쁜 · 가장 기발한</b> 앱 🏅</li>
+  </ol>
+  <div class="box tip"><p class="t">📱 내 폰에 내 앱 깔기</p><p>폰으로 내 주소 열기 →<br>아이폰: 공유 → <b>홈 화면에 추가</b><br>갤럭시: 점 3개 → <b>홈 화면에 추가</b><br>내일부터 진짜로 써 보세요. 기록은 그 폰에 저장돼요!</p></div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="완성 체크리스트"><div class="si">
+<div class="tags"><span class="tag study">체크</span><span class="tm">88~90분</span></div>
+<h2>완성 체크리스트</h2>
+<div class="cols">
+<ul class="chk">
+  <li>해결하려는 <b>생활 문제</b>와 <b>사용자</b>를 정했다</li>
+  <li><b>입력 · 계산 · 판단</b>을 설계표에 적었다</li>
+  <li>Canvas로 앱을 만들고 <b>버그를 하나 이상</b> 찾아 고쳤다</li>
+  <li>업그레이드 메뉴판에서 기능을 <b>하나 이상</b> 더했다</li>
+</ul>
+<ul class="chk">
+  <li>테스트에 <b>가상 데이터</b>만 썼다</li>
+  <li><b>index.html</b> 파일로 저장했다</li>
+  <li><b>○○○.vercel.app</b> 주소를 받아 폰에서 열었다</li>
+  <li>친구 앱을 써 보고 <b>댓글</b>을 남겼다</li>
+</ul>
+</div>
+<div class="box"><p class="t">오늘 기억할 3가지</p><ul><li>모든 앱은 <b>입력 → 처리(계산 · 판단) → 출력</b></li><li>앱의 두뇌는 <b>변수(바구니) · 반복(하나씩 더하기) · 조건(만약 ~라면)</b></li><li>데이터를 다루는 사람은 <b>사실 확인 · 개인정보 보호 · 배려</b>를 책임져요</li></ul></div>
+</div></section>
+
+<section class="slide teacher" data-t="선생님 참고 — 운영 · 준비"><div class="si">
+<h2>선생님 참고 · 운영과 준비<small>수업 중에는 건너뛰어도 되는 슬라이드입니다.</small></h2>
+<table class="s"><thead><tr><th style="width:17%">항목</th><th>준비 · 대응</th></tr></thead><tbody>
+<tr><td class="k">독립 수업</td><td>33~34차시와 연결 없음. Canvas 켜는 법·고쳐 달라는 공식은 STEP 1 슬라이드에 다시 들어 있어 처음 온 학생도 따라올 수 있음</td></tr>
+<tr><td class="k">계정</td><td>제미나이 · Canvas · 버셀 모두 <b>구글 계정</b>. 지난 시간 버셀 가입한 학생은 <b>로그인만</b> → 빨리 끝남</td></tr>
+<tr><td class="k">완성 예시</td><td>2번 · 6번 슬라이드의 계산기는 교안 안에서 바로 작동. 6번은 계산 과정이 코드로 보임</td></tr>
+<tr><td class="k">영양 수치</td><td>교안 계산기의 음식 수치는 <b>수업용 예시값</b>. 정확한 값은 식품의약품안전처 식품영양성분 DB(go.kr)에서 비교하도록 안내 → 이론 ④와 연결</td></tr>
+<tr><td class="k">패들렛</td><td>"35~36차시" 칸 미리 만들기 — 앱 이름 · 한 줄 소개 · 주소</td></tr>
+<tr><td class="k">플랜 B</td><td>버셀 가입이 막히면 Canvas 오른쪽 위 <b>[공유] → 링크 복사</b>로 패들렛에 올리기</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="slide teacher" data-t="선생님 참고 — 막힐 때 Q&amp;A"><div class="si">
+<h2>선생님 참고 · 막힐 때 Q&amp;A</h2>
+<table class="s"><thead><tr><th style="width:32%">학생 질문</th><th>답</th></tr></thead><tbody>
+<tr><td class="k">무슨 앱을 만들지 모르겠어요</td><td>STEP 1 주제 카드에서 하나 고르고 설계표의 <b>[고른 주제 예시로 채우기]</b> → 한두 칸만 내 말로 바꾸기</td></tr>
+<tr><td class="k">앱이 너무 복잡하게 나와요</td><td>"<b>기능을 3개만 남기고 단순하게</b> 다시 만들어 줘"</td></tr>
+<tr><td class="k">새로고침하면 기록이 사라져요</td><td>업그레이드 메뉴판 <b>💾 날짜별 기록 저장</b> 요청. Canvas 미리보기에서는 저장이 안 될 수 있음 → index.html로 열어서 확인</td></tr>
+<tr><td class="k">그래프가 안 나와요</td><td>"<b>외부 라이브러리 없이</b> HTML canvas로 직접 그려 줘"</td></tr>
+<tr><td class="k">친구 폰에서는 내 기록이 안 보여요</td><td>정상이에요 — 창고가 <b>각자 기기의 로컬 스토리지</b>라서. (이론 ② 다시 보기)</td></tr>
+<tr><td class="k">버셀 주소가 빈 화면이에요</td><td>폴더 안 파일 이름이 정확히 <b>index.html</b> 인지 / 폴더째 올렸는지 확인</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="slide teacher" data-t="선생님 참고 — 이 수업의 포인트"><div class="si">
+<h2>선생님 참고 · 이 수업의 포인트<small>참고 교안(AI로 만드는 식단 설계 앱 스튜디오 1~4차시)에서 가져온 요소</small></h2>
+<table class="s"><thead><tr><th style="width:20%">관점</th><th>내용</th></tr></thead><tbody>
+<tr><td class="k">재미 요소</td><td>교안 안에서 바로 누르는 <b>한 끼 계산기</b> · 주제 6가지 중 고르기 · <b>버그 헌터 🏅</b> · 서로 써 보기 + 3부문 투표 · 폰 홈 화면에 내 앱</td></tr>
+<tr><td class="k">기술 요소</td><td>서비스 흐름(입력·처리·출력) · CRUD · 화면/통로/두뇌/창고 · 변수·반복·조건 · 로컬 스토리지 · 버셀 배포</td></tr>
+<tr><td class="k">이론</td><td>바구니 비유를 <b>직접 눌러 보며</b> 코드 한 줄(<code>total = total + food</code>)과 연결 (이론 ③)</td></tr>
+<tr><td class="k">뺀 것</td><td>참고 교안의 구글 고급검색 자료 수집 · 팀 패들렛 토의는 시간 관계상 '사실 확인' 카드 하나로 압축</td></tr>
+<tr><td class="k">학생에게 남는 것</td><td>내 생활 문제를 푸는 <b>진짜 쓸 수 있는 앱</b>과, 앱이 움직이는 원리를 설명할 수 있는 힘</td></tr>
+</tbody></table>
+</div></section>
+
+</div></div>
+<button id="tocBtn" type="button">목차</button>
+<div id="nav"><button id="prev" type="button">← 이전</button><button id="next" type="button">다음 →</button></div>
+<div id="toc"><div class="th">목차 <span>번호를 누르면 이동합니다 · Esc 닫기</span></div><ol id="tocList"></ol></div>
+<script>
+/* ── 슬라이드 넘기기 ── */
+(function(){
+  var track=document.getElementById('track'),
+      slides=[].slice.call(track.children), total=slides.length, i=0,
+      bar=document.getElementById('bar'), cnt=document.getElementById('count'),
+      prev=document.getElementById('prev'), next=document.getElementById('next'),
+      toc=document.getElementById('toc'), tocList=document.getElementById('tocList'),
+      tocBtn=document.getElementById('tocBtn');
+
+  slides.forEach(function(s,n){
+    var t=s.getAttribute('data-t')||('슬라이드 '+(n+1)),
+        li=document.createElement('li'), b=document.createElement('button');
+    b.innerHTML='<b>'+String(n+1).padStart(2,'0')+'</b>'+t;
+    b.onclick=function(){go(n);toc.classList.remove('on');};
+    li.appendChild(b); tocList.appendChild(li);
+  });
+  var tb=[].slice.call(tocList.querySelectorAll('button'));
+
+  function go(n){
+    i=Math.max(0,Math.min(total-1,n));
+    track.style.transform='translateX(-'+(i*100)+'vw)';
+    slides[i].scrollTop=0;
+    bar.style.width=((i+1)/total*100)+'%';
+    cnt.textContent=String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+    prev.disabled=(i===0); next.disabled=(i===total-1);
+    tb.forEach(function(b,k){b.className=(k===i)?'cur':'';});
+    try{history.replaceState(null,'','#'+(i+1));}catch(e){}
+    document.dispatchEvent(new CustomEvent('slidechange',{detail:slides[i]}));
+  }
+  prev.onclick=function(){go(i-1);};
+  next.onclick=function(){go(i+1);};
+  tocBtn.onclick=function(){toc.classList.toggle('on');};
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){toc.classList.remove('on');return;}
+    if(toc.classList.contains('on'))return;
+    // 입력칸 · 데모 안에서는 키를 가로채지 않음
+    if(e.target.closest&&e.target.closest('input,textarea,select,.demo,.vp'))return;
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(total-1);}
+  });
+
+  var x0=null,y0=null;
+  track.addEventListener('touchstart',function(e){
+    if(e.target.closest('.demo,.vp,input'))return;
+    x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  track.addEventListener('touchend',function(e){
+    if(x0===null)return;
+    var dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) go(dx<0?i+1:i-1);
+    x0=null;
+  },{passive:true});
+
+  window.addEventListener('load',function(){
+    var st=parseInt((location.hash||'').replace('#',''),10);
+    go(isNaN(st)?0:st-1);
+  });
+})();
+
+/* ── 복사 버튼 (data-c 또는 data-from 대상의 글자) ── */
+document.addEventListener('click',function(e){
+  var btn=e.target.closest('.copy'); if(!btn)return;
+  var box=btn.parentNode, txt;
+  if(btn.getAttribute('data-from')){var src=document.getElementById(btn.getAttribute('data-from'));txt=src?src.textContent:'';}
+  else{var cl=box.cloneNode(true);[].forEach.call(cl.querySelectorAll('.copy'),function(c){c.remove()});txt=cl.textContent.trim();}
+  function done(){btn.textContent='복사됨';btn.classList.add('ok');
+    setTimeout(function(){btn.textContent='복사';btn.classList.remove('ok');},1600);}
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity=0;
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(err){}
+    document.body.removeChild(ta);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done,fallback);
+  else fallback();
+});
+
+/* ── 버셀 따라하기 플레이어 (도민 폴더 vercel-help.html 내용 이식) ── */
+(function(){
+  var root=document.getElementById('vp'); if(!root)return;
+  var slide=root.closest('.slide');
+  // h: 이미지 높이(가로 800 기준). 좌표는 이미지 안 위치(px)
+  var S=[
+    {img:'01',h:900,t:'vercel.com/drop 들어가기',d:'주소창에 <b>vercel.com/drop</b> 입력 → 오른쪽 위 <b>Sign Up</b>(가입) 누르기',act:[{c:[738,32]}]},
+    {img:'02',h:860,t:'구글로 가입',d:'<b>Continue with Google</b> 누르기',act:[{c:[391,380]}]},
+    {img:'03',h:660,t:'내 구글 계정으로 로그인',d:'계정을 고르거나, 메일 주소 입력 → 다음 → 비밀번호',act:[{c:[605,591]}]},
+    {img:'04',h:620,t:'요금제 고르기',d:'아래쪽 <b>I\'m working on personal projects (Hobby)</b> 누르기',w:'⚠ 처음엔 위쪽 Pro(유료 체험)에 체크되어 있어요!',act:[{box:[178,194,622,238],tag:'유료 ✕',gray:1},{c:[318,262]}]},
+    {img:'05',h:620,t:'팀 이름 쓰기',d:'<b>Team Name</b> 칸을 누르고 <b>영어</b>로 이름 쓰기 (예: kim)',w:'⚠ 한글은 안 들어가요 — 한/영 키로 바꾸기',act:[{c:[400,363]}]},
+    {img:'06',h:620,t:'Continue 누르기',d:'단추가 <b>검은색</b>으로 바뀌면 <b>Continue</b>',act:[{c:[400,464]}]},
+    {img:'07',h:900,t:'폴더 끌어다 놓기',d:'다시 <b>vercel.com/drop</b> → <b>my-app 폴더</b>를 통째로 가운데로 끌어다 놓기',act:[{drag:[[110,820],[400,470]]}]},
+    {img:'08',h:540,t:'이름 정하고 Deploy',d:'<b>Project Name</b>에 <b>영어 이름</b>(이게 주소가 돼요) → <b>Deploy</b> 누르기',act:[{c:[578,385]},{c:[400,454]}]},
+    {img:'09',h:540,t:'잠깐 기다리기',d:'Deploy 단추가 빙글빙글 — 몇 초면 끝나요',act:[{box:[64,432,736,476]}]},
+    {img:'10',h:700,t:'Congratulations! 🎉',d:'올리기 성공! 화면을 <b>아래로</b> 내립니다',act:[{box:[64,175,300,210]}]},
+    {img:'11',h:360,t:'Continue to Project',d:'맨 아래 <b>Continue to Project</b> 누르기',act:[{c:[391,307]}]},
+    {img:'12',h:810,t:'내 주소 확인',d:'<b>Domains</b> 아래 <b>○○○.vercel.app</b>이 내 주소! 옆 <b>↗</b>를 눌러 열고 → 주소창 누르고 <b>Ctrl+C</b>로 복사',w:'⚠ 위쪽 긴 주소(Deployment)는 보내지 마세요',act:[{box:[40,516,350,540],tag:'이건 아님',gray:1},{box:[40,588,246,614],tag:'내 주소 ✓'},{c:[228,601]}]},
+    {img:'13',h:540,t:'완성! 🙌',d:'내 웹앱이 인터넷에 올라갔어요. 주소를 폰으로 보내 열어 보세요',act:[]}
+  ];
+  var W=800, i=0, playing=true, active=false, timer=null, seq=[];
+  var $=function(id){return document.getElementById(id)};
+  var frame=$('vframe'),shot=$('vshot'),cur=$('vcursor'),ring=$('vring'),chip=$('vchip'),dots=$('vdots'),stage=$('vstage');
+  S.forEach(function(_,k){var e=document.createElement('i');e.title=(k+1)+'단계';e.onclick=function(){go(k)};dots.appendChild(e)});
+  S.forEach(function(s){var im=new Image();im.src='img/vercel-'+s.img+'.jpg'});
+  function pct(x,y,h){return {l:(x/W*100)+'%',t:(y/h*100)+'%'}}
+  function clear(){seq.forEach(clearTimeout);seq=[];clearTimeout(timer);
+    frame.querySelectorAll('.vbox,.vtag').forEach(function(e){e.remove()});
+    ring.classList.remove('go');chip.classList.remove('on');}
+  function later(fn,ms){seq.push(setTimeout(fn,ms))}
+  function moveCursor(x,y,h){var p=pct(x,y,h);cur.style.left=p.l;cur.style.top=p.t}
+  function fit(s){var hh=(stage.clientHeight||window.innerHeight*.6)-16, ww=(stage.clientWidth||600)-16;
+    frame.style.width=Math.min(ww,hh*W/s.h,560)+'px';}
+  function render(){
+    clear();
+    var s=S[i]; fit(s);
+    $('vcap').innerHTML='<span class="no">'+(i+1)+' / '+S.length+'</span><span class="t">'+s.t+'</span><div class="d">'+s.d+(s.w?'<span class="w">'+s.w+'</span>':'')+'</div>';
+    shot.src='img/vercel-'+s.img+'.jpg'; shot.alt=s.t;
+    [].forEach.call(dots.children,function(e,k){e.classList.toggle('on',k===i)});
+    cur.style.transition='none';moveCursor(560,s.h*0.92,s.h);cur.getBoundingClientRect();cur.style.transition='';
+    var t=500;
+    s.act.forEach(function(a){
+      if(a.box){later(function(){
+        var b=document.createElement('div');b.className='vbox'+(a.gray?' x':'');
+        var p=pct(a.box[0],a.box[1],s.h);b.style.left=p.l;b.style.top=p.t;
+        b.style.width=((a.box[2]-a.box[0])/W*100)+'%';b.style.height=((a.box[3]-a.box[1])/s.h*100)+'%';
+        frame.appendChild(b);requestAnimationFrame(function(){b.classList.add('on')});
+        if(a.tag){var g=document.createElement('div');g.className='vtag'+(a.gray?' gray':'');g.textContent=a.tag;
+          var q=pct(a.box[2]+6,a.box[1]-2,s.h);g.style.left=q.l;g.style.top=q.t;
+          if(a.box[2]>640){g.style.left='auto';g.style.right=((W-a.box[2])/W*100)+'%';g.style.top=((a.box[1]-26)/s.h*100)+'%'}
+          frame.appendChild(g);requestAnimationFrame(function(){g.classList.add('on')});}
+      },t);t+=700;}
+      if(a.c){later(function(){ring.classList.remove('go');moveCursor(a.c[0],a.c[1],s.h)},t);
+        later(function(){var p=pct(a.c[0],a.c[1],s.h);ring.style.left=p.l;ring.style.top=p.t;ring.classList.add('go')},t+950);
+        t+=1900;}
+      if(a.drag){var f=a.drag[0],to=a.drag[1];
+        later(function(){chip.style.transition='none';var p=pct(f[0],f[1],s.h);chip.style.left=p.l;chip.style.top=p.t;
+          chip.getBoundingClientRect();chip.style.transition='';chip.classList.add('on');moveCursor(f[0]+10,f[1]+8,s.h)},t);
+        later(function(){var p=pct(to[0],to[1],s.h);chip.style.left=p.l;chip.style.top=p.t;moveCursor(to[0]+10,to[1]+8,s.h)},t+1000);
+        later(function(){var p=pct(to[0],to[1],s.h);ring.style.left=p.l;ring.style.top=p.t;ring.classList.add('go')},t+2400);
+        t+=3000;}
+    });
+    var dur=Math.max(t+1800,3800);
+    var bar=$('vbar');bar.style.transition='none';bar.style.width='0';bar.getBoundingClientRect();
+    if(playing&&active){bar.style.transition='width '+dur+'ms linear';bar.style.width='100%';
+      timer=setTimeout(function(){go(i<S.length-1?i+1:0)},dur);}
+  }
+  function go(k){i=k;render()}
+  $('vprev').onclick=function(){go(Math.max(0,i-1))};
+  $('vnext').onclick=function(){go(Math.min(S.length-1,i+1))};
+  $('vplay').onclick=function(){playing=!playing;this.textContent=playing?'⏸ 멈춤':'▶ 재생';
+    if(playing){render()}else{clear();var b=$('vbar');b.style.transition='none';}};
+  root.addEventListener('keydown',function(e){if(e.key==='ArrowRight')$('vnext').click();if(e.key==='ArrowLeft')$('vprev').click()});
+  document.addEventListener('slidechange',function(e){
+    var now=(e.detail===slide);
+    if(now&&!active){active=true;render();}
+    else if(!now&&active){active=false;clear();}
+  });
+  window.addEventListener('resize',function(){if(active)fit(S[i])});
+  render();
+})();
+/* ── 한 끼 계산기 (완성 예시 · 이론 ③ 공용) ── */
+(function(){
+  // 수업용 예시값 (1회 분량 기준, 실제와 다를 수 있음)
+  var FOODS=[
+    {e:'🍚',n:'밥 한 공기',cal:300,carb:65,pro:5},{e:'🍎',n:'사과',cal:100,carb:25,pro:0.5},
+    {e:'🥛',n:'우유',cal:120,carb:10,pro:6},{e:'🍙',n:'김밥 한 줄',cal:320,carb:50,pro:9},
+    {e:'🍜',n:'라면',cal:500,carb:79,pro:10},{e:'🍗',n:'닭가슴살',cal:110,carb:0,pro:23},
+    {e:'🥚',n:'삶은 달걀',cal:75,carb:1,pro:6},{e:'🍌',n:'바나나',cal:90,carb:23,pro:1}];
+  function judge(cal,pro){
+    if(!cal)return ['','음식을 눌러 한 끼를 채워 보세요'];
+    var m=cal<500?['low','🍽 조금 부족해요 — 우유나 과일을 더해 볼까요?']:cal<=900?['ok','👍 알맞은 한 끼예요!']:['hi','⚠ 많이 먹었어요 — 다음 끼니는 가볍게!'];
+    if(pro<15)m[1]+=' · 💪 단백질이 부족해요';
+    return m;
+  }
+  function r1(x){return Math.round(x*10)/10}
+  function make(root,trace){
+    if(!root)return;
+    root.innerHTML='<p class="bk-h">🥗 오늘의 한 끼 계산기</p><p class="bk-s">먹은 음식을 눌러 담아요 · 기준: 한 끼 500~900kcal</p>'+
+      '<div class="bk-foods">'+FOODS.map(function(f,k){return '<button type="button" data-k="'+k+'"><b>'+f.e+'</b>'+f.n+'</button>'}).join('')+'</div>'+
+      '<div class="bk-list"></div><div class="bk-tot"><div><b data-v="cal">0</b>총 열량(kcal)</div><div><b data-v="carb">0</b>탄수화물(g)</div><div><b data-v="pro">0</b>단백질(g)</div></div>'+
+      (trace?'<div class="bk-trace"></div>':'')+'<div class="bk-msg"></div><div class="bk-foot"><span>※ 영양 수치는 수업용 예시값</span><button type="button" data-r>🧺 비우기</button></div>';
+    var list=root.querySelector('.bk-list'),msg=root.querySelector('.bk-msg'),tr=root.querySelector('.bk-trace'),
+        tot={cal:0,carb:0,pro:0},items=[];
+    function paint(last,prev){
+      ['cal','carb','pro'].forEach(function(k){root.querySelector('[data-v='+k+']').textContent=r1(tot[k])});
+      list.innerHTML=items.length?items.map(function(f){return '<span>'+f.e+' '+f.n+'</span>'}).join(''):'<span style="border:0;color:#94A3B8">🧺 바구니가 비어 있어요</span>';
+      var j=judge(tot.cal,tot.pro);msg.className='bk-msg '+j[0];msg.textContent=j[1];
+      if(tr){
+        if(!last){tr.innerHTML='<span class="c">// 변수: 빈 바구니를 0으로 준비</span>\n<span class="k">total_cal</span> = <span class="v">0</span>\n<span class="k">total_protein</span> = <span class="v">0</span>';return;}
+        tr.innerHTML='<span class="c">// 반복 '+items.length+'번째: '+last.e+' '+last.n+' 꺼내서 더하기</span>\n'+
+          '<span class="k">total_cal</span> = '+prev.cal+' + '+last.cal+' = <span class="v new">'+r1(tot.cal)+'</span>\n'+
+          '<span class="k">total_protein</span> = '+prev.pro+' + '+last.pro+' = <span class="v new">'+r1(tot.pro)+'</span>\n'+
+          '<span class="c">// 조건: '+(tot.cal<500?'total_cal &lt; 500 → "조금 부족해요"':tot.cal<=900?'500 ≤ total_cal ≤ 900 → "알맞아요"':'total_cal &gt; 900 → "많이 먹었어요"')+'</span>';
+      }
+    }
+    root.addEventListener('click',function(e){
+      var b=e.target.closest('button');if(!b)return;
+      if(b.hasAttribute('data-r')){tot={cal:0,carb:0,pro:0};items=[];paint();return;}
+      var f=FOODS[+b.getAttribute('data-k')];if(!f)return;
+      var prev={cal:r1(tot.cal),pro:r1(tot.pro)};
+      tot.cal+=f.cal;tot.carb+=f.carb;tot.pro+=f.pro;items.push(f);paint(f,prev);
+    });
+    paint();
+  }
+  make(document.getElementById('bkA'),false);
+  make(document.getElementById('bkB'),true);
+})();
+
+/* ── STEP 1: 웹앱 설계표 → 주문서 ── */
+(function(){
+  var f=document.getElementById('af'); if(!f)return;
+  var out=document.getElementById('aout'),KEY='aform35';
+  var EX={
+    '식단 매니저':{problem:'아침을 자주 거르고 간식을 많이 먹는다',who:'나 같은 중학생',input:'날짜, 아침·점심·저녁·간식으로 먹은 음식',calc:'하루 총 열량과 단백질',cif:'총 열량이 1500kcal보다 적으면',cthen:'끼니를 거르지 않았는지 확인해 보세요',show:'영양 분석 결과와 날짜별 열량 그래프',mood:'건강하고 상쾌한'},
+    '용돈 기록장':{problem:'용돈이 어디로 사라졌는지 모르겠다',who:'용돈을 받는 중학생',input:'날짜, 쓴 곳(간식·문구·교통 등), 금액',calc:'이번 주 쓴 돈 합계와 남은 돈',cif:'이번 주 쓴 돈이 예산을 넘으면',cthen:'예산 초과! 이번 주는 아껴 써요',show:'항목별 지출 비율과 남은 돈',mood:'밝고 알록달록한'},
+    '공부 타이머':{problem:'공부를 얼마나 했는지 기억이 안 난다',who:'시험을 준비하는 중학생',input:'과목 이름, 시작·멈춤 버튼으로 잰 공부 시간',calc:'과목별 공부 시간 합계와 오늘 총 시간',cif:'오늘 총 공부 시간이 목표 시간을 넘으면',cthen:'목표 달성! 오늘도 수고했어요',show:'과목별 막대그래프와 연속 공부 일수',mood:'심플하고 깔끔한'},
+    '독서 기록장':{problem:'읽던 책을 자꾸 끝까지 못 읽는다',who:'책을 더 읽고 싶은 학생',input:'책 제목, 오늘 읽은 쪽수, 한 줄 느낌',calc:'이번 달 읽은 쪽수 합계',cif:'이번 달 목표 쪽수의 절반을 넘으면',cthen:'반이나 왔어요! 조금만 더 힘내요',show:'책별 진행률 막대와 한 줄 느낌 모음',mood:'귀여운'},
+    '운동 챌린지':{problem:'운동을 시작해도 3일을 못 간다',who:'운동 습관을 만들고 싶은 친구',input:'날짜, 줄넘기 횟수 또는 걸음 수',calc:'연속으로 운동한 일수와 이번 주 합계',cif:'연속 운동 일수가 7일이 되면',cthen:'일주일 챌린지 성공 배지를 드려요',show:'달력에 운동한 날 도장과 배지',mood:'게임 같은'},
+    '물·잠 기록':{problem:'물을 잘 안 마시고 늦게 잔다',who:'건강한 생활을 하고 싶은 중학생',input:'마신 물 컵 수, 잠든 시간과 일어난 시간',calc:'하루 마신 물 양과 잔 시간',cif:'잔 시간이 8시간보다 적으면',cthen:'오늘은 조금 일찍 자 볼까요?',show:'일주일 물·잠 그래프',mood:'건강하고 상쾌한'}};
+  function v(n){var e=f.querySelector('[name='+n+']:checked')||f.querySelector('input[type=text][name='+n+']');return e?e.value.trim():'';}
+  function b(x,ph){return x||'('+ph+')'}
+  function build(){
+    var L=['아래 설계대로 웹앱을 HTML 파일 하나로 만들어 줘.',
+      '','[만들고 싶은 웹앱] '+b(v('topic'),'주제'),
+      '- 해결할 문제: '+b(v('problem'),'해결할 문제'),
+      '- 누구를 위한 앱: '+b(v('who'),'사용자'),
+      '- ① 입력 (사용자가 넣는 정보): '+b(v('input'),'입력할 정보'),
+      '- ② 계산 (앱이 자동으로): '+b(v('calc'),'계산할 것'),
+      '- ③ 판단: 만약 '+b(v('cif'),'조건')+' → "'+b(v('cthen'),'안내 문구')+'" 안내',
+      '- 결과 화면: '+b(v('show'),'보여 줄 것'),
+      '- 분위기: '+b(v('mood'),'분위기')+' 느낌',
+      '','[조건]',
+      '- 입력한 기록은 브라우저 로컬 스토리지에 저장하고, 기록마다 [삭제] 버튼',
+      '- 휴대폰 세로 화면에서도 보기 좋게',
+      '- 처음 화면에는 실제 개인정보가 아닌 예시 데이터를 보여 줘'];
+    out.textContent=L.join('\n');
+    var d={};[].forEach.call(f.elements,function(e){if(!e.name)return;if(e.type==='text')d[e.name]=e.value;else if(e.checked)d[e.name]=e.value;});
+    try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}
+  }
+  function load(d){[].forEach.call(f.elements,function(e){if(!e.name)return;
+    if(e.type==='text')e.value=d[e.name]||'';else e.checked=(d[e.name]===e.value);});build();}
+  f.addEventListener('input',build);f.addEventListener('change',build);
+  document.getElementById('afx').onclick=function(){var t=v('topic')||'식단 매니저',d=Object.assign({topic:t},EX[t]);load(d);};
+  document.getElementById('afc').onclick=function(){load({});};
+  var saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  load(saved);
+})();
+
+</script>
+</body>
+</html>
