@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바이브코딩 ① 말로 만드는 나만의 미니게임 | 남원중 33~34차시</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--navy:#1E3A8A;--blue:#2563EB;--sky:#60A5FA;--or:#F97316;--orl:#FFF4EB;--bg:#EFF6FF;--card:#DBEAFE;
+  --ink:#1a1d20;--gray:#64748B;--line:#E2E8F0;--sub:#F8FAFC}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:#fff;color:var(--ink);
+  font-family:"Pretendard","Malgun Gothic","맑은 고딕",-apple-system,sans-serif;
+  font-size:20px;line-height:1.7;word-break:keep-all;-webkit-font-smoothing:antialiased}
+
+#deck{position:fixed;inset:0;overflow:hidden}
+#track{display:flex;height:100%;transition:transform .32s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{flex:0 0 100vw;height:100vh;overflow-y:auto;padding:62px 7vw 96px;display:flex;flex-direction:column;justify-content:center}
+.si{width:100%;max-width:1060px;margin:auto}
+
+#bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--or));width:0;z-index:40;transition:width .32s}
+#top{position:fixed;top:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 7vw;font-size:13px;color:var(--gray);z-index:30;pointer-events:none}
+#count{font-variant-numeric:tabular-nums;font-weight:700;color:var(--blue)}
+#nav{position:fixed;bottom:22px;right:7vw;display:flex;gap:8px;z-index:30}
+#nav button,#tocBtn{font-family:inherit;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--ink);
+  padding:9px 17px;border-radius:8px;cursor:pointer;line-height:1.2}
+#nav button:hover,#tocBtn:hover{border-color:var(--blue);color:var(--blue)}
+#nav button[disabled]{opacity:.3;cursor:default;border-color:var(--line);color:var(--gray)}
+#tocBtn{position:fixed;bottom:22px;left:7vw;z-index:30}
+#toc{position:fixed;inset:0;background:#fff;z-index:50;display:none;padding:56px 7vw;overflow-y:auto}
+#toc.on{display:block}
+#toc .th{font-size:22px;font-weight:700;margin:0 0 22px}
+#toc .th span{font-size:13px;color:var(--gray);font-weight:400;margin-left:10px}
+#toc ol{list-style:none;padding:0;margin:0;column-width:290px;column-gap:40px}
+#toc button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);
+  font-family:inherit;font-size:15px;color:var(--ink);padding:10px 4px;cursor:pointer;line-height:1.35;break-inside:avoid}
+#toc button:hover{color:var(--blue);background:var(--bg)}
+#toc button b{color:var(--or);font-variant-numeric:tabular-nums;margin-right:12px;font-size:13px}
+#toc button.cur{color:var(--blue);font-weight:700}
+
+/* cover */
+.cover{background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 55%,#FFF4EB 100%)}
+.cover .eyebrow{display:inline-block;background:var(--or);color:#fff;font-weight:700;font-size:15px;letter-spacing:.04em;margin:0 0 18px;padding:5px 14px;border-radius:20px}
+.cover h1{font-size:56px;font-weight:800;margin:0 0 18px;line-height:1.2;letter-spacing:-.03em;color:var(--navy)}
+.cover h1 em{font-style:normal;color:var(--or)}
+.cover .sub{color:#334155;font-size:21px;margin:0 0 30px}
+.cover .meta{display:flex;flex-wrap:wrap;gap:10px}
+.cover .meta span{background:#fff;border:1px solid var(--card);border-radius:20px;padding:7px 16px;font-size:15px;color:var(--navy);font-weight:600}
+
+/* headings */
+.tags{display:flex;gap:9px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
+.tag{font-size:13.5px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.03em;line-height:1.2}
+.tag.study{background:var(--bg);border:1.5px solid var(--card);color:var(--blue)}
+.tag.do{background:var(--or);color:#fff}
+.tag.t{background:#F1F5F9;color:var(--gray)}
+.tm{display:inline-block;background:var(--sub);color:var(--gray);font-size:13.5px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid var(--line)}
+h2{font-size:34px;font-weight:800;margin:0 0 20px;padding:0 0 13px;border-bottom:3px solid var(--card);
+  line-height:1.3;letter-spacing:-.02em;color:var(--navy)}
+h2 small{display:block;font-size:17px;font-weight:500;color:var(--gray);margin-top:8px;letter-spacing:0}
+.slide.do h2{border-bottom-color:var(--or)}
+.slide.do{background:#FFFDFB}
+.slide.study{background:#FBFDFF}
+
+/* blocks */
+p{margin:12px 0}
+.lead{font-size:26px;font-weight:700;line-height:1.45;margin:6px 0 4px;letter-spacing:-.01em;color:var(--navy)}
+.lead em{font-style:normal;color:var(--or)}
+.note{color:var(--gray);font-size:17px;margin-top:14px}
+b{font-weight:700}
+.hi{background:linear-gradient(transparent 58%,#FED7AA 58%);font-weight:700;padding:0 2px}
+code,.mono{font-family:"D2Coding","Consolas",monospace;font-size:.9em;background:#F1F5F9;border-radius:4px;padding:1px 6px}
+ul.pts{list-style:none;padding:0;margin:16px 0}
+ul.pts li{position:relative;padding-left:32px;margin:14px 0;font-size:21px;line-height:1.6}
+ul.pts li:before{content:"";position:absolute;left:4px;top:13px;width:12px;height:12px;border-radius:50%;background:var(--sky)}
+ul.chk{list-style:none;padding:0;margin:16px 0}
+ul.chk li{position:relative;padding-left:40px;margin:13px 0;font-size:21px}
+ul.chk li:before{content:"☐";position:absolute;left:0;top:-3px;color:var(--or);font-size:26px}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:18px}
+th,td{border:1px solid var(--line);padding:12px 15px;text-align:left;vertical-align:top;line-height:1.5}
+th{background:var(--bg);font-weight:700;font-size:16px;color:var(--navy)}
+td.k{font-weight:700;color:var(--blue);white-space:nowrap;background:#FCFDFF}
+table.s{font-size:16px}
+table.s th,table.s td{padding:9px 12px}
+
+.box{border:1px solid var(--card);border-left:6px solid var(--blue);background:var(--bg);padding:18px 24px;margin:18px 0;border-radius:6px}
+.box .t{font-weight:800;margin:0 0 6px;color:var(--blue);font-size:19px}
+.box p{margin:6px 0;font-size:19px}
+.box ul{margin:8px 0;padding-left:22px}
+.box li{margin:6px 0;font-size:18px}
+.warn{border-left-color:#DC2626;background:#FEF2F2;border-color:#FECACA}
+.warn .t{color:#DC2626}
+.tip{border-left-color:var(--or);background:var(--orl);border-color:#FED7AA}
+.tip .t{color:#C2410C}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.cards.two{grid-template-columns:repeat(2,1fr)}
+.cards.four{grid-template-columns:repeat(4,1fr)}
+.card{border:1px solid var(--card);border-top:5px solid var(--blue);border-radius:8px;padding:18px 18px 16px;background:#fff}
+.card.or{border-top-color:var(--or)}
+.card .ic{font-size:32px;line-height:1;margin:0 0 8px}
+.card .h{font-weight:800;font-size:20px;margin:0 0 6px;color:var(--navy)}
+.card p{margin:0;font-size:16.5px;color:#475569;line-height:1.55}
+.card .n{display:inline-block;background:var(--or);color:#fff;font-weight:800;font-size:13px;border-radius:12px;padding:1px 10px;margin-bottom:8px}
+
+/* 순환 고리 */
+.loop{display:flex;align-items:stretch;gap:10px;margin:22px 0;flex-wrap:wrap}
+.loop .st{flex:1;min-width:150px;background:#fff;border:2px solid var(--card);border-radius:12px;padding:16px;text-align:center}
+.loop .st .ic{font-size:34px}
+.loop .st .h{font-weight:800;color:var(--navy);font-size:20px;margin:4px 0}
+.loop .st p{margin:0;font-size:15.5px;color:var(--gray);line-height:1.5}
+.loop .ar{align-self:center;color:var(--or);font-size:28px;font-weight:800}
+
+/* 따라하기 단계 */
+ol.steps{list-style:none;padding:0;margin:18px 0;counter-reset:st}
+ol.steps li{position:relative;padding-left:54px;margin:15px 0;font-size:21px;line-height:1.5;counter-increment:st;min-height:34px}
+ol.steps li:before{content:counter(st);position:absolute;left:0;top:0;width:34px;height:34px;
+  border-radius:50%;background:var(--or);color:#fff;font-size:16px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;line-height:1}
+ol.steps li .s{display:block;color:var(--gray);font-size:16px;margin-top:3px;line-height:1.5}
+
+/* 프롬프트 */
+.plabel{font-size:14.5px;font-weight:700;color:var(--blue);margin:16px 0 -4px;letter-spacing:.02em}
+.plabel i{font-style:normal;color:var(--gray);font-weight:400;margin-left:8px;font-size:14px}
+.prompt{position:relative;background:#F8FAFC;border:1px solid var(--line);border-left:4px solid var(--sky);border-radius:6px;
+  padding:16px 90px 16px 20px;margin:12px 0;font-size:18px;line-height:1.65;white-space:pre-wrap;color:#0F172A}
+.copy{position:absolute;top:10px;right:10px;font-family:inherit;font-size:12.5px;border:1px solid var(--line);
+  background:#fff;color:var(--gray);padding:5px 11px;border-radius:6px;cursor:pointer}
+.copy:hover{border-color:var(--blue);color:var(--blue)}
+.copy.ok{border-color:#16A34A;color:#16A34A}
+.qs .row{margin:0 0 10px}
+.qs .lb{font-weight:700;color:var(--navy);font-size:17px;margin:0 0 4px}
+.qs .lb i{font-style:normal;color:var(--gray);font-weight:400;font-size:15px;margin-left:8px}
+.qs .prompt{margin:0;padding:12px 90px 12px 18px;font-size:17px;line-height:1.55}
+
+/* 2단 레이아웃 */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.cols.wide{grid-template-columns:1.25fr 1fr}
+
+/* 완성 예시 · 데모 */
+.hook{font-size:24px;font-weight:800;color:var(--or);margin:0 0 6px}
+.demo{background:#fff;border:2px solid var(--card);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(37,99,235,.10)}
+.demo .bt{display:flex;gap:6px;margin:-6px 0 12px}
+.demo .bt i{width:11px;height:11px;border-radius:50%;background:#E2E8F0}
+.demo .bt i:first-child{background:#FCA5A5}.demo .bt i:nth-child(2){background:#FCD34D}.demo .bt i:nth-child(3){background:#86EFAC}
+.demo .bt span{margin-left:10px;font-size:12.5px;color:var(--gray);font-family:Consolas,monospace}
+.pin{display:flex;gap:12px;align-items:flex-start;margin:12px 0}
+.pin .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.pin .h{font-weight:800;color:var(--navy);font-size:19px}
+.pin p{margin:2px 0 0;font-size:16px;color:var(--gray);line-height:1.5}
+.ph{border:2px dashed var(--sky);border-radius:12px;background:var(--bg);color:var(--blue);text-align:center;padding:14px;font-size:14.5px;margin-top:12px}
+
+/* 작은 버튼 · 입력 */
+.btn{font-family:inherit;font-weight:700;font-size:16px;border:0;border-radius:10px;padding:10px 18px;cursor:pointer;background:var(--blue);color:#fff}
+.btn.or{background:var(--or)}
+.btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--card)}
+.btn:active{transform:translateY(1px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;border:1.5px solid var(--card);background:#fff;border-radius:20px;padding:6px 13px;font-size:15.5px;color:#334155}
+.chips input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.fld{margin:0 0 11px}
+.fld .lb{display:block;font-size:14.5px;font-weight:800;color:var(--navy);margin:0 0 4px}
+.fld .lb i{font-style:normal;font-weight:400;color:var(--gray);margin-left:6px}
+.fld input[type=text]{width:100%;font-family:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:8px;padding:8px 11px;background:#fff}
+.fld input[type=text]:focus{outline:0;border-color:var(--sky);box-shadow:0 0 0 3px #DBEAFE}
+.out{position:relative;background:#0F172A;color:#E2E8F0;border-radius:12px;padding:16px 18px;font-size:16px;line-height:1.65;white-space:pre-wrap;min-height:200px}
+.out .copy{background:#1E293B;color:#CBD5E1;border-color:#334155}
+.out .copy.ok{color:#86EFAC;border-color:#86EFAC}
+.mini{font-size:14px;color:var(--gray)}
+
+/* 선생님 슬라이드 */
+.teacher{background:#F8FAFC}
+.teacher h2{border-bottom-color:#CBD5E1;color:#334155}
+
+@media(max-width:900px){
+  body{font-size:17px}
+  .slide{padding:58px 5vw 90px;justify-content:flex-start}
+  .cover h1{font-size:34px} h2{font-size:25px} .lead{font-size:20px}
+  ul.pts li,ul.chk li,ol.steps li{font-size:17px}
+  table{font-size:14px} th,td{padding:8px 9px} table.s{font-size:13px}
+  .prompt{font-size:15px}
+  .cards,.cards.four,.cards.two,.cols,.cols.wide{grid-template-columns:1fr}
+  .loop .ar{display:none}
+  #top,#toc{padding-left:5vw;padding-right:5vw}
+  #nav{right:5vw} #tocBtn{left:5vw}
+}
+@media print{
+  html,body{height:auto;overflow:visible}
+  #bar,#top,#nav,#tocBtn,#toc,.copy{display:none!important}
+  #deck{position:static}#track{display:block;transform:none!important}
+  .slide{height:auto;page-break-after:always;padding:0 0 20px;display:block}
+  .si{max-width:none}
+  @page{size:A4 landscape;margin:13mm}
+}
+
+/* ==== 버셀 따라하기 플레이어 (도민 vercel-help 이식) ==== */
+.vp{display:grid;grid-template-columns:minmax(260px,1fr) 1.35fr;gap:22px;align-items:start}
+.vcap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-height:150px}
+.vcap .no{display:inline-block;background:var(--or);color:#fff;font-weight:800;border-radius:14px;padding:1px 11px;font-size:14px;margin-right:6px}
+.vcap .t{font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--navy)}
+.vcap .d{font-size:16.5px;color:#475569;margin-top:6px;line-height:1.55}
+.vcap .d b{color:var(--ink)}
+.vcap .w{display:block;color:#DC2626;font-weight:700;margin-top:6px;font-size:15.5px}
+.vbar{height:5px;background:#E2E8F0;border-radius:3px;margin:10px 0;overflow:hidden}
+.vbar span{display:block;height:100%;width:0;background:var(--or)}
+.vctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vctrl button{font:inherit;font-weight:800;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:15px}
+.vctrl button.main{background:var(--blue);color:#fff;border-color:var(--blue);min-width:96px}
+.vdots{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.vdots i{width:14px;height:14px;border-radius:50%;background:#CBD5E1;cursor:pointer}
+.vdots i.on{background:var(--or)}
+.vstage{background:#F8FAFC;border:1px solid var(--line);border-radius:12px;height:64vh;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;padding:8px}
+.vframe{position:relative;width:420px;max-width:100%}
+.vframe img{width:100%;display:block;border-radius:4px}
+.vcursor{position:absolute;width:30px;height:30px;left:50%;top:110%;transform:translate(-4px,-3px);transition:left .9s cubic-bezier(.4,0,.2,1),top .9s cubic-bezier(.4,0,.2,1);z-index:5;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.vring{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border:4px solid var(--or);border-radius:50%;opacity:0;z-index:4;pointer-events:none}
+.vring.go{animation:vring 1.4s ease-out infinite}
+@keyframes vring{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.vbox{position:absolute;border:4px solid var(--or);border-radius:8px;background:rgba(249,115,22,.08);opacity:0;transition:opacity .4s;z-index:3;pointer-events:none}
+.vbox.on{opacity:1}
+.vbox.x{border-color:#94A3B8;background:rgba(0,0,0,.04)}
+.vtag{position:absolute;background:var(--or);color:#fff;font-weight:800;font-size:13px;border-radius:6px;padding:2px 8px;white-space:nowrap;opacity:0;transition:opacity .4s;z-index:6;pointer-events:none}
+.vtag.on{opacity:1}
+.vtag.gray{background:#64748B}
+.vchip{position:absolute;display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--navy);border-radius:8px;padding:6px 10px;font-weight:800;font-size:14px;z-index:6;box-shadow:0 6px 16px rgba(0,0,0,.18);transition:left 1.4s cubic-bezier(.4,0,.2,1),top 1.4s cubic-bezier(.4,0,.2,1),opacity .3s;transform:translate(-50%,-50%);opacity:0;pointer-events:none}
+.vchip.on{opacity:1}
+.vtips{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vtip{border-radius:10px;padding:12px 15px;font-size:15.5px;line-height:1.55}
+.vtip b.h{display:block;font-size:16.5px;margin-bottom:3px}
+.vtip.red{background:#FEF2F2;border:1px solid #FECACA}
+.vtip.blue{background:var(--bg);border:1px solid var(--card)}
+.vtip.green{background:#F0FDF4;border:1px solid #BBF7D0}
+.vtip img{width:100%;max-width:240px;display:block;border:1px solid var(--line);border-radius:6px;margin-top:8px}
+@media(max-width:900px){.vp,.vtips{grid-template-columns:1fr}.vstage{height:52vh}}
+@media (prefers-reduced-motion:reduce){.vcursor,.vchip{transition:none}.vring.go{animation:none;opacity:1}}
+/* 10초 게임 데모 */
+.g10{text-align:center;background:linear-gradient(135deg,#FFEDD5,#FBCFE8 60%,#DBEAFE);border-radius:12px;padding:22px 16px}
+.g10-h{font-size:24px;font-weight:800;color:#9A3412}
+.g10-d{font-size:15px;color:#7C2D12;margin:4px 0 0;line-height:1.5}
+.g10-d small{color:#9A3412;opacity:.8}
+.g10-t{font-size:64px;font-weight:800;color:#fff;background:linear-gradient(135deg,#38BDF8,#6366F1);display:inline-block;
+  border-radius:16px;padding:6px 30px;margin:14px 0;font-variant-numeric:tabular-nums;min-width:240px;box-shadow:0 8px 20px rgba(99,102,241,.3)}
+.g10-t span{font-size:28px;margin-left:4px}
+.g10-t.hide{color:transparent;text-shadow:0 0 18px rgba(255,255,255,.95)}
+.g10-b{display:flex;gap:8px;justify-content:center}
+.g10-b .btn[disabled]{opacity:.4;cursor:default}
+.g10-m{font-size:19px;font-weight:800;color:#1E3A8A;margin-top:12px;min-height:30px}
+.g10-best{font-size:14px;color:#64748B}
+/* 3형제 데모 */
+.lk-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.lk-tabs button{font-family:inherit;font-size:15px;font-weight:700;border:1.5px solid var(--card);background:#fff;color:#334155;border-radius:20px;padding:6px 13px;cursor:pointer}
+.lk-tabs button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.lk-view{height:120px;display:flex;align-items:center;justify-content:center;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:10px;margin:12px 0}
+.lk-view button{font-family:serif;font-size:16px}
+#lk.c .lk-view button,#lk.j .lk-view button{font-family:"Pretendard",sans-serif;font-size:22px;font-weight:800;color:#fff;background:linear-gradient(135deg,#FB7185,#F97316);
+  border:0;border-radius:30px;padding:12px 28px;box-shadow:0 6px 16px rgba(249,115,22,.35);cursor:pointer;transition:transform .12s}
+#lk.j .lk-view button:active{transform:scale(.92)}
+.lk-code{background:#0F172A;color:#E2E8F0;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.55;margin:0;white-space:pre-wrap;font-family:"D2Coding",Consolas,monospace;min-height:110px}
+.lk-code .h{color:#C4B5FD}.lk-code .c{color:#93C5FD}.lk-code .j{color:#FDE68A}
+
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="top"><span>남원중학교 방과후 · 33~34차시 바이브코딩 ① 말로 만드는 나만의 미니게임</span><span id="count"></span></div>
+<div id="deck"><div id="track">
+
+<section class="slide cover" data-t="바이브코딩 ① 말로 만드는 나만의 미니게임"><div class="si">
+<p class="eyebrow">남원중학교 방과후 · 33~34차시 · 90분</p>
+<h1>바이브코딩 ①<br>말로 만드는 <em>나만의 미니게임</em></h1>
+<p class="sub">코드를 몰라도 괜찮아요. 제미나이 Canvas에 <b>말로 주문</b>해서 게임을 만들고,<br><b>버셀(Vercel)</b>로 내 주소를 받아 친구 폰에서 플레이합니다.</p>
+<div class="meta"><span>🎮 결과물: 내 게임 주소 ○○○.vercel.app</span><span>🤖 도구: Gemini Canvas · Vercel</span><span>⏱ 이론 짧게 · 실습 길게</span></div>
+</div></section>
+
+<section class="slide study" data-t="완성 예시 먼저 보기"><div class="si">
+<div class="tags"><span class="tag study">완성 예시</span><span class="tm">0~2분</span></div>
+<div class="cols wide">
+  <div class="demo" id="g10">
+    <div class="bt"><i></i><i></i><i></i><span>https://my-game.vercel.app</span></div>
+    <div class="g10">
+      <div class="g10-h">⏱ 10초 맞추기 게임</div>
+      <div class="g10-d">시작을 누르고, 마음속으로 10초를 세서 멈추세요!<br><small>3초가 지나면 숫자가 사라져요 👀</small></div>
+      <div class="g10-t" id="g10t">0.00<span>초</span></div>
+      <div class="g10-b"><button class="btn" id="g10s" type="button">시작</button><button class="btn or" id="g10p" type="button" disabled>멈추기</button><button class="btn ghost" id="g10r" type="button">리셋</button></div>
+      <div class="g10-m" id="g10m">기록에 도전해 보세요</div>
+      <div class="g10-best" id="g10b"></div>
+    </div>
+  </div>
+  <div>
+    <p class="hook">오늘 수업 끝나면 이거 완성돼요! 👇</p>
+    <p class="mini" style="margin:0 0 6px">← 직접 눌러 보세요. 선생님이 제미나이에게 <b>말로만</b> 주문해서 만든 게임이에요.</p>
+    <div class="pin"><div class="n">1</div><div><div class="h">말 한 줄로 만든 게임</div><p>"10초 맞추기 게임을 만들어 줘" — 코드는 AI가 짭니다</p></div></div>
+    <div class="pin"><div class="n">2</div><div><div class="h">내 아이디어로 개조</div><p>숫자 숨기기 · 오차 표시 · 최고 기록처럼 "고쳐 줘"로 기능 추가</p></div></div>
+    <div class="pin"><div class="n">3</div><div><div class="h">내 주소로 공유</div><p><b>○○○.vercel.app</b> — 친구 폰에서도 바로 플레이</p></div></div>
+  </div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="오늘의 미션 3가지"><div class="si">
+<div class="tags"><span class="tag study">오늘의 미션</span><span class="tm">2~3분</span></div>
+<h2>오늘의 미션 3가지</h2>
+<div class="cards">
+  <div class="card"><span class="n">미션 1 · 1차시</span><div class="ic">⏱</div><div class="h">10초 게임 만들고 고치기</div><p>Canvas로 첫 게임을 만들고, 말로 고쳐서 반 최고 기록에 도전</p></div>
+  <div class="card or"><span class="n">미션 2 · 2차시</span><div class="ic">🎨</div><div class="h">나만의 미니게임 만들기</div><p>게임 설계표를 채워 주문서를 완성하고, 내 아이디어로 게임 제작</p></div>
+  <div class="card"><span class="n">미션 3 · 2차시</span><div class="ic">🚀</div><div class="h">내 주소 받고 서로 플레이</div><p>버셀로 ○○○.vercel.app 주소를 받아 패들렛에 올리고 투표</p></div>
+</div>
+<table class="s"><thead><tr><th style="width:12%">차시</th><th style="width:15%">시간</th><th>무엇을</th></tr></thead><tbody>
+<tr><td class="k" rowspan="3">1차시</td><td>0~5분</td><td>이론 — 바이브코딩 4단계 · 웹앱 3형제(HTML · CSS · JS)</td></tr>
+<tr><td>5~35분</td><td>STEP 1 — 10초 맞추기 게임 만들기 → 고쳐 달라고 하기</td></tr>
+<tr><td>35~45분</td><td>10초 챌린지 — 최고 기록 캡처해서 패들렛에</td></tr>
+<tr><td class="k" rowspan="3">2차시</td><td>45~50분</td><td>이론 — 좋은 주문서 3단 공식 · 아이디어 떠올리기</td></tr>
+<tr><td>50~70분</td><td>STEP 2 — 게임 설계표 → 나만의 게임 만들기 → 개조</td></tr>
+<tr><td>70~90분</td><td>STEP 3 — index.html 저장 → 버셀 주소 받기 → 서로 플레이 · 투표</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="slide study" data-t="이론 ① 바이브코딩이란?"><div class="si">
+<div class="tags"><span class="tag study">이론 ①</span><span class="tm">1차시 · 0~5분</span></div>
+<h2>바이브코딩이란?<small>코드를 한 줄씩 쓰는 대신, 만들고 싶은 걸 <b>말로 설명</b>하면 AI가 코드를 짜 주는 개발 방법</small></h2>
+<div class="loop">
+  <div class="st"><div class="ic">💬</div><div class="h">① 요청하기</div><p>"이런 웹앱을<br>만들어 줘"</p></div><div class="ar">→</div>
+  <div class="st"><div class="ic">👀</div><div class="h">② 결과 확인</div><p>화면과 기능이<br>나왔는지 살피기</p></div><div class="ar">→</div>
+  <div class="st"><div class="ic">🕹</div><div class="h">③ 테스트</div><p>직접 눌러 보며<br>제대로 되는지 확인</p></div><div class="ar">→</div>
+  <div class="st"><div class="ic">✏</div><div class="h">④ 수정하기</div><p>부족한 점을<br>다시 요청</p></div>
+</div>
+<div class="cols">
+  <div class="box"><p class="t">🤖 오늘 쓰는 AI — Google Gemini의 Canvas</p><p>채팅 옆에 <b>미리보기 화면</b>이 붙어 있어서, AI가 만든 앱을 바로 눌러 볼 수 있어요. 대화로 계속 고칠 수 있는 개발 공간입니다.</p></div>
+  <div class="box tip"><p class="t">💡 비밀은 ④ → ① 반복</p><p>한 번에 완벽한 게임은 없어요. <b>몇 바퀴 돌리느냐</b>가 게임의 완성도를 정합니다. 프로 개발자도 똑같이 일해요.</p></div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="이론 ② 웹앱 3형제 HTML · CSS · JS"><div class="si">
+<div class="tags"><span class="tag study">이론 ②</span><span class="tm">1차시 · 0~5분</span></div>
+<h2>웹앱 3형제 — HTML · CSS · JavaScript<small>AI가 만들어 주는 게임 파일 안에는 이 셋이 들어 있어요. 오른쪽 버튼을 차례로 눌러 보세요!</small></h2>
+<div class="cols">
+  <div>
+    <div class="pin"><div class="n" style="background:#A855F7">H</div><div><div class="h">HTML = 건물의 뼈대 🦴</div><p>기둥·벽처럼 제목, 글, 버튼이 <b>어디에 있는지</b> 정해요</p></div></div>
+    <div class="pin"><div class="n" style="background:var(--blue)">C</div><div><div class="h">CSS = 인테리어 🎨</div><p>벽지·커튼처럼 색, 글꼴, 크기, 배치를 <b>예쁘게</b> 꾸며요</p></div></div>
+    <div class="pin"><div class="n" style="background:#EAB308">J</div><div><div class="h">JavaScript = 자동문 · 스위치 ⚡</div><p>누르면 숫자가 오르고, 시간이 흐르게 — <b>움직이게</b> 만들어요</p></div></div>
+    <p class="note">HTML + CSS = 보기만 하는 <b>정적 화면</b> → JavaScript를 더하면 반응하는 <b>동적 화면</b>(게임!)</p>
+  </div>
+  <div class="demo" id="lk">
+    <div class="lk-tabs"><button type="button" data-s="h" class="on">① HTML만</button><button type="button" data-s="c">② + CSS</button><button type="button" data-s="j">③ + JavaScript</button></div>
+    <div class="lk-view"><button type="button" id="lkb">♥ 좋아요 <span id="lkn">0</span></button></div>
+    <pre class="lk-code" id="lkc"></pre>
+    <p class="mini" id="lkm" style="margin:6px 0 0"></p>
+  </div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 1 — Canvas로 10초 맞추기 게임 만들기"><div class="si">
+<div class="tags"><span class="tag do">STEP 1</span><span class="tm">1차시 · 5~20분</span></div>
+<h2>Canvas로 10초 맞추기 게임 만들기<small>코딩을 몰라도 제미나이로 10초 만에 게임을 만들어 플레이할 수 있을까?</small></h2>
+<div class="cols">
+  <div>
+    <ol class="steps">
+      <li><b>gemini.google.com</b> 접속 → 학교 구글 계정 로그인</li>
+      <li>입력창 아래 <b>[도구]</b> → <b>Canvas</b> 켜기<span class="s">입력창에 "캔버스" 표시가 보이면 OK</span></li>
+      <li>아래 주문을 붙여넣고 보내기</li>
+      <li>오른쪽 <b>미리보기</b>에서 직접 플레이!</li>
+    </ol>
+  </div>
+  <div>
+    <p class="plabel">일단 아주 간단하게 연습해 볼게요</p>
+    <div class="prompt"><button class="copy" type="button">복사</button>10초 맞추기 게임을 만들어 줘. 웹앱</div>
+    <div class="box tip"><p class="t">👀 옆 친구 화면을 보세요</p><p>같은 문장을 넣었는데 <b>디자인이 다 달라요!</b> 생성형 AI는 매번 새로 만들어 내기 때문이에요.</p></div>
+    <div class="box warn"><p class="t">코드 글자만 잔뜩 나와요</p><p>Canvas가 꺼져 있어요 → [도구] → Canvas 켜고 다시 보내기</p></div>
+  </div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 1 — 고쳐 달라고 하기"><div class="si">
+<div class="tags"><span class="tag do">STEP 1</span><span class="tm">1차시 · 20~35분</span></div>
+<h2>고쳐 달라고 하기 — 수정 요청<small>"안 돼요" · "이상해요"는 AI가 못 알아들어요</small></h2>
+<p class="lead">[언제] + [무엇이] + [어떻게 되는데] → <em>[어떻게] 되게 해 줘</em></p>
+<div class="qs">
+  <div class="row"><p class="lb">조작 바꾸기<i>버튼 말고 키보드로</i></p><div class="prompt"><button class="copy" type="button">복사</button>시작 버튼 클릭 말고도 스페이스바를 이용해서 시작과 멈추기를 할 수 있게 해 줘.</div></div>
+  <div class="row"><p class="lb">기능 더하기<i>리셋</i></p><div class="prompt"><button class="copy" type="button">복사</button>리셋 버튼을 만들어 줘. 누르면 다시 처음처럼 0.00초로 보이게 해 줘.</div></div>
+  <div class="row"><p class="lb">난이도 올리기<i>숫자 숨기기</i></p><div class="prompt"><button class="copy" type="button">복사</button>3초가 지나면 숫자가 안 보이게 숨겨 줘. 멈추면 기록과 10초와의 오차를 보여 줘.</div></div>
+  <div class="row"><p class="lb">디자인 바꾸기<i>분위기</i></p><div class="prompt"><button class="copy" type="button">복사</button>좀 더 알록달록하고 예쁘게 디자인을 바꿔 줘. 배경은 그라데이션, 버튼은 크고 둥글게.</div></div>
+</div>
+<p class="note">✔ <b>한 번에 하나씩</b> 요청하기 · 망가지면 "<b>방금 고치기 전으로 되돌려 줘</b>"</p>
+</div></section>
+
+<section class="slide do" data-t="10초 챌린지 — 반 최고 기록에 도전"><div class="si">
+<div class="tags"><span class="tag do">챌린지</span><span class="tm">1차시 · 35~45분</span></div>
+<h2>⏱ 10초 챌린지 — 게임 시작!<small>내가 만든 10초 맞추기 게임으로 반 최고 기록에 도전해요</small></h2>
+<div class="cols">
+  <div>
+    <ol class="steps">
+      <li>내 게임으로 <b>3번</b> 도전하기</li>
+      <li>10.00초에 <b>가장 가까운</b> 기록 화면 캡처<span class="s"><b>Win + Shift + S</b> → 네모 그리기 → 자동 복사</span></li>
+      <li>패들렛 <b>33~34차시 칸</b>에 붙여넣기 (Ctrl + V)</li>
+      <li>오차가 가장 작은 친구가 <b>오늘의 10초 왕 👑</b></li>
+    </ol>
+  </div>
+  <div>
+    <div class="box"><p class="t">🔎 친구 게임과 비교해 보기</p><ul><li>숫자를 숨기는 게임 vs 계속 보이는 게임 — 어느 쪽이 더 재밌나요?</li><li>친구 게임에만 있는 기능이 있다면? → 내 게임에도 "고쳐 줘"로 추가!</li></ul></div>
+    <div class="box tip"><p class="t">✅ 1차시 끝 체크</p><p>게임이 실행되고 <b>한 번 이상</b> 고쳐 봤으면 성공! 제미나이 <b>대화창은 닫지 마세요</b> — 2차시에 이어서 씁니다.</p></div>
+  </div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="이론 ③ 좋은 주문서 3단 공식 · 아이디어"><div class="si">
+<div class="tags"><span class="tag study">이론 ③</span><span class="tm">2차시 · 45~50분</span></div>
+<h2>이번엔 나만의 아이디어로! — 좋은 주문서 3단 공식</h2>
+<table><thead><tr><th style="width:17%">주문서</th><th>이렇게 써요</th></tr></thead><tbody>
+<tr><td class="k">① 무엇을</td><td>"웹 브라우저에서 바로 되는 <b>'우주선 운석 피하기' 게임</b>을 만들어 줘"</td></tr>
+<tr><td class="k">② 규칙 1.2.3.</td><td>기능을 <b>번호로 쪼개서</b> — 줄글로 쓰면 AI가 중간을 빠뜨려요</td></tr>
+<tr><td class="k">③ 분위기</td><td>"<b>검은 우주 배경에 반짝이는 별</b>, 버튼은 크고 둥글게"</td></tr>
+</tbody></table>
+<p class="plabel">아이디어 떠올리기 — 이런 게임은 어때요?</p>
+<div class="cards four" style="margin-top:12px">
+  <div class="card"><div class="ic">❓</div><div class="h">퀴즈 챌린지</div><p>OX · 4지선다, 우리 반 퀴즈</p></div>
+  <div class="card or"><div class="ic">🌀</div><div class="h">미로 탈출</div><p>방향키로 출구까지</p></div>
+  <div class="card"><div class="ic">🃏</div><div class="h">카드 뒤집기</div><p>같은 그림 짝 맞추기</p></div>
+  <div class="card or"><div class="ic">✊</div><div class="h">가위바위보 대결</div><p>컴퓨터와 승부, 연승 기록</p></div>
+  <div class="card or"><div class="ic">☄</div><div class="h">장애물 피하기</div><p>떨어지는 운석·똥 피하기</p></div>
+  <div class="card"><div class="ic">⚡</div><div class="h">반응속도 테스트</div><p>초록색이 되면 클릭!</p></div>
+  <div class="card or"><div class="ic">🎯</div><div class="h">스피드 클릭</div><p>10초 동안 최대한 많이</p></div>
+  <div class="card"><div class="ic">🎲</div><div class="h">랜덤 추첨기</div><p>급식 메뉴·발표 순서 뽑기</p></div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 2 — 게임 설계표 (주문서 자동 완성)"><div class="si">
+<div class="tags"><span class="tag do">STEP 2</span><span class="tm">2차시 · 50~58분</span><span class="tag t">실습 페이지</span></div>
+<h2>나만의 미니게임 설계표<small>칸을 채우면 오른쪽에 주문서가 저절로 완성돼요 → [복사] → 제미나이 <b>새 채팅</b>(Canvas 켜기)에 붙여넣기</small></h2>
+<div class="cols">
+  <form id="gf" autocomplete="off" onsubmit="return false">
+    <div class="fld"><span class="lb">1. 게임 종류</span><div class="chips" data-name="kind">
+      <label><input type="radio" name="kind" value="퀴즈 챌린지"><span>퀴즈</span></label><label><input type="radio" name="kind" value="미로 탈출"><span>미로</span></label><label><input type="radio" name="kind" value="카드 뒤집기"><span>카드 뒤집기</span></label><label><input type="radio" name="kind" value="가위바위보 대결"><span>가위바위보</span></label><label><input type="radio" name="kind" value="장애물 피하기"><span>장애물 피하기</span></label><label><input type="radio" name="kind" value="반응속도 테스트"><span>반응속도</span></label><label><input type="radio" name="kind" value="스피드 클릭"><span>스피드 클릭</span></label><label><input type="radio" name="kind" value="랜덤 추첨기"><span>추첨기</span></label></div></div>
+    <div class="fld"><span class="lb">2. 게임 이름<i>예: 우주선 운석 피하기</i></span><input type="text" name="title" placeholder="게임 이름"></div>
+    <div class="fld"><span class="lb">3. 규칙 1 · 2 · 3<i>어떻게 하면 점수가 오르고, 언제 끝나요?</i></span>
+      <input type="text" name="r1" placeholder="규칙 1 — 조작 방법 (예: 방향키로 우주선을 좌우로 움직인다)" style="margin-bottom:6px">
+      <input type="text" name="r2" placeholder="규칙 2 — 점수 (예: 운석을 피할 때마다 10점)" style="margin-bottom:6px">
+      <input type="text" name="r3" placeholder="규칙 3 — 끝 (예: 운석에 3번 부딪히면 게임 오버)"></div>
+    <div class="fld"><span class="lb">4. 분위기</span><div class="chips">
+      <label><input type="radio" name="mood" value="귀엽고 알록달록한"><span>귀여운</span></label><label><input type="radio" name="mood" value="검은 우주 배경에 별이 반짝이는"><span>우주</span></label><label><input type="radio" name="mood" value="옛날 오락실 픽셀 느낌의"><span>레트로 픽셀</span></label><label><input type="radio" name="mood" value="어두운 배경에 네온사인처럼 빛나는"><span>네온</span></label><label><input type="radio" name="mood" value="숲과 하늘처럼 자연스럽고 밝은"><span>자연</span></label></div></div>
+    <div class="fld"><span class="lb">5. 넣을 기능<i>여러 개 골라도 돼요</i></span><div class="chips">
+      <label><input type="checkbox" name="ext" value="게임 전에 제목과 [시작하기] 버튼이 있는 첫 화면"><span>시작 화면</span></label><label><input type="checkbox" name="ext" value="최고 점수를 브라우저 로컬 스토리지에 저장해서 새로고침해도 남게"><span>최고 기록 저장</span></label><label><input type="checkbox" name="ext" value="시간이 지날수록 점점 빨라지고 어려워지게"><span>점점 어렵게</span></label><label><input type="checkbox" name="ext" value="점수가 오를 때 짧은 효과음"><span>효과음</span></label><label><input type="checkbox" name="ext" value="휴대폰에서도 터치로 플레이할 수 있게"><span>폰 터치</span></label></div></div>
+    <button type="button" class="btn ghost" id="gfx" style="font-size:14px;padding:7px 13px">예시로 채워 보기</button> <button type="button" class="btn ghost" id="gfc" style="font-size:14px;padding:7px 13px">지우기</button>
+  </form>
+  <div>
+    <p class="plabel" style="margin-top:0">완성된 주문서</p>
+    <div class="out" style="margin-top:10px"><button class="copy" type="button" data-from="gout">복사</button><span id="gout"></span></div>
+    <p class="mini">적은 내용은 이 컴퓨터에만 저장돼요. 이름·학번 같은 개인정보는 쓰지 마세요.</p>
+  </div>
+</div>
+</div></section>
+
+<section class="slide do" data-t="STEP 2 — 만들고 개조하기 (메뉴판)"><div class="si">
+<div class="tags"><span class="tag do">STEP 2</span><span class="tm">2차시 · 58~70분</span></div>
+<h2>만들고, 해 보고, 개조하기<small>주문서를 보내 게임이 나오면 플레이 → 아래 메뉴판에서 골라 하나씩 요청</small></h2>
+<div class="qs">
+  <div class="row"><p class="lb">🎨 테마 바꾸기</p><div class="prompt"><button class="copy" type="button">복사</button>게임 캐릭터를 내가 좋아하는 이모지로 바꾸고, 배경은 밤하늘로 바꿔 줘.</div></div>
+  <div class="row"><p class="lb">💣 함정 넣기</p><div class="prompt"><button class="copy" type="button">복사</button>가끔 폭탄 💣이 나오게 하고, 폭탄을 건드리면 5점이 깎이게 해 줘.</div></div>
+  <div class="row"><p class="lb">🏆 신기록 축하</p><div class="prompt"><button class="copy" type="button">복사</button>최고 점수를 로컬 스토리지에 저장하고, 결과 화면에 "이번 점수"와 "최고 기록"을 나란히 보여 줘. 최고 기록을 넘으면 "신기록!"이 크게 뜨게 해 줘.</div></div>
+  <div class="row"><p class="lb">📱 폰에서 깨질 때</p><div class="prompt"><button class="copy" type="button">복사</button>휴대폰 세로 화면에서 버튼이 잘려. 화면 폭에 맞춰 자동으로 줄어들게 해 줘.</div></div>
+</div>
+<p class="note">그림은 <b>이모지</b>나 <b>AI가 새로 그린 것</b>만 — 인터넷에서 가져온 캐릭터 그림은 저작권 문제가 생길 수 있어요.</p>
+</div></section>
+
+<section class="slide do" data-t="STEP 3 — 게임을 index.html 파일로 저장"><div class="si">
+<div class="tags"><span class="tag do">STEP 3</span><span class="tm">2차시 · 70~74분</span></div>
+<h2>게임을 <code>index.html</code> 파일로 저장하기<small>버셀에 올리려면 Canvas 안의 게임을 내 컴퓨터 파일로 꺼내야 해요</small></h2>
+<div class="cols">
+  <ol class="steps">
+    <li>바탕화면에 <b>my-game</b> 폴더 만들기<span class="s">마우스 오른쪽 → 새로 만들기 → 폴더 (영어 이름!)</span></li>
+    <li>Canvas 오른쪽 위 <b>[코드]</b> 보기 → 코드 칸 클릭 → <b>Ctrl + A</b> → <b>Ctrl + C</b></li>
+    <li><b>메모장</b> 열고 Ctrl + V 붙여넣기</li>
+    <li>[파일] → <b>다른 이름으로 저장</b> → my-game 폴더 → 이름 <b>index.html</b><span class="s">파일 형식: <b>모든 파일</b> · 인코딩: <b>UTF-8</b></span></li>
+    <li>index.html을 <b>더블클릭</b> → 크롬에서 게임이 열리면 성공!</li>
+  </ol>
+  <div>
+    <div class="box warn"><p class="t">⚠ index.html.txt 가 되어 버렸어요</p><p>파일 형식을 '모든 파일'로 안 바꿔서 그래요. 탐색기 [보기] → <b>파일 확장명</b> 켜고 이름에서 .txt 지우기</p></div>
+    <div class="box warn"><p class="t">⚠ 한글이 깨져요</p><p>저장할 때 인코딩을 <b>UTF-8</b>로 다시 저장</p></div>
+    <div class="box"><p class="t">왜 이름이 꼭 index.html?</p><p>웹사이트의 <b>첫 페이지(현관문)</b>라는 약속된 이름이에요. 이름이 다르면 주소를 열었을 때 빈 화면이 나와요.</p></div>
+  </div>
+</div>
+</div></section>
+
+
+<section class="slide do" data-t="STEP 3 — 버셀로 내 주소 받기"><div class="si"><div class="tags"><span class="tag do">STEP 3</span><span class="tm">2차시 · 74~82분</span></div><h2>버셀(Vercel)로 내 주소 받기<small>구글로 가입하고 → <b>my-game 폴더</b>를 끌어다 놓으면 → <b>○○○.vercel.app</b> 주소가 생깁니다. 화면이 저절로 넘어가요.</small></h2>
+<div class="vp" id="vp" tabindex="-1">
+  <div>
+    <div class="vcap" id="vcap"></div>
+    <div class="vbar"><span id="vbar"></span></div>
+    <div class="vctrl">
+      <button id="vprev" type="button">◀ 이전</button>
+      <button id="vplay" class="main" type="button">⏸ 멈춤</button>
+      <button id="vnext" type="button">다음 ▶</button>
+    </div>
+    <div class="vdots" id="vdots"></div>
+    <p class="mini" style="margin-top:14px">점을 누르면 그 단계로 바로 갑니다. 화면은 Vercel 2026년 10월 기준이에요.</p>
+  </div>
+  <div class="vstage" id="vstage">
+    <div class="vframe" id="vframe">
+      <img id="vshot" alt="">
+      <svg class="vcursor" id="vcursor" viewBox="0 0 24 24"><path d="M3 2l17 9-7.5 1.8L9 20z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <div class="vring" id="vring"></div>
+      <div class="vchip" id="vchip">📁 my-game</div>
+    </div>
+  </div>
+</div></div></section>
+
+<section class="slide do" data-t="STEP 3 — 버셀, 막히면 여기를 보세요"><div class="si"><div class="tags"><span class="tag do">STEP 3</span><span class="tm">2차시 · 74~82분</span></div><h2>버셀, 막히면 여기를 보세요</h2>
+<div class="vtips">
+  <div class="vtip red"><b class="h">⚠ "Social Account is not yet connected…" 가 떠요</b>
+    <b>Log in</b>(로그인)을 눌러서 그래요. 처음이면 가입부터 해야 합니다. 노란 칸의 <b>Sign up?</b>을 누르고 다시 <b>Continue with Google</b>.
+    <img src="img/vercel-err.jpg" alt="Social Account is not yet connected 안내 화면"></div>
+  <div>
+    <div class="vtip red" style="margin-bottom:12px"><b class="h">⚠ 팀 이름이 안 써지고 Continue가 안 눌려요</b>
+      한글로 쳐서 그래요. 키보드 <b>한/영</b> 키로 바꾸고 <b>영어</b>로 쓰세요. 예) <code>kim</code></div>
+    <div class="vtip red"><b class="h">⚠ Pro / Hobby 고르는 화면</b>
+      처음엔 <b>Pro(유료 체험)</b>에 체크되어 있어요. 꼭 아래 <b>personal projects · Hobby</b>를 누르세요.</div>
+  </div>
+  <div class="vtip blue"><b class="h">💡 내 주소는 짧은 쪽입니다</b>
+    프로젝트 화면 <b>Domains</b> 아래 <code>이름.vercel.app</code>이 내 주소예요. 위쪽의 긴 주소(<code>이름-abc123-….vercel.app</code>)는 보내지 마세요.</div>
+  <div class="vtip blue"><b class="h">💡 Project Name = 주소</b>
+    여기 쓴 이름이 주소 앞부분이 됩니다. <b>영어 소문자와 - 만</b> 쓰세요. 이미 누가 쓰는 이름이면 뒤에 엉뚱한 단어가 붙어요 (예: test → <code>test-peach-xi-87</code>). 그래도 괜찮아요 — Domains에 보이는 그대로가 내 주소입니다.</div>
+  <div class="vtip green"><b class="h">📋 내 주소 복사하는 법</b>
+    ① <b>Domains</b> 아래 주소 옆 <b>↗</b>를 눌러 내 사이트 열기 → ② 새로 열린 창의 <b>주소창</b>을 한 번 누르기 → ③ <b>Ctrl + C</b> (복사) → ④ 카톡·패들렛에 <b>Ctrl + V</b> (붙여넣기). 주소는 <code>https://○○○.vercel.app</code> 모양이면 맞아요.</div>
+  <div class="vtip green"><b class="h">✏ 고친 파일을 다시 올리려면</b>
+    vercel.com 로그인 → <b>내 프로젝트</b> 화면에 고친 폴더를 <b>아무 데나 끌어다 놓으면</b> 같은 주소로 바뀝니다. <b>vercel.com/drop</b>에 다시 올리면 새 주소가 생겨요.</div>
+</div>
+<div class="box warn" style="margin-top:14px"><p class="t">✓ 마지막 확인</p><p>내 주소를 카톡 <b>나와의 채팅</b>으로 보내고 <b>폰</b>에서 눌러 보세요. 로그인 없이 게임이 보이면 성공! 올린 자료는 주소를 아는 <b>누구나</b> 볼 수 있으니 전화번호·집 주소 같은 개인정보는 넣지 마세요.</p></div>
+</div></section>
+
+
+<section class="slide do" data-t="서로 플레이하고 투표하기"><div class="si">
+<div class="tags"><span class="tag do">공유</span><span class="tm">2차시 · 82~88분</span></div>
+<h2>제작한 게임 공유하기 — 서로 플레이!</h2>
+<div class="cols">
+  <ol class="steps">
+    <li>패들렛 <b>33~34차시</b> 칸에 <b>게임 이름 + 내 주소</b> 올리기</li>
+    <li>친구 게임 열어서 한 게임 <b>2분</b>씩 플레이</li>
+    <li>댓글 두 줄 — <b>좋았던 점 하나 + 이렇게 하면 더 재밌겠다 하나</b></li>
+    <li>투표 — <b>가장 중독성 있는 · 가장 예쁜 · 가장 기발한</b> 게임 🏅</li>
+  </ol>
+  <div class="box tip"><p class="t">📱 집에서 해 보기 — 폰에 내 앱 깔기</p><p>폰으로 내 주소 열기 →<br>아이폰: 공유 → <b>홈 화면에 추가</b><br>갤럭시: 점 3개 → <b>홈 화면에 추가</b><br>세상에 하나뿐인 내 게임 앱이 생겨요!</p></div>
+</div>
+</div></section>
+
+<section class="slide study" data-t="완성 체크리스트"><div class="si">
+<div class="tags"><span class="tag study">체크</span><span class="tm">88~90분</span></div>
+<h2>완성 체크리스트</h2>
+<div class="cols">
+<ul class="chk">
+  <li>Canvas로 <b>10초 맞추기 게임</b>을 만들어 플레이했다</li>
+  <li>"고쳐 줘"를 <b>한 번 이상</b> 요청해 봤다</li>
+  <li>10초 챌린지 기록을 <b>패들렛</b>에 올렸다</li>
+  <li>설계표로 <b>나만의 게임 주문서</b>를 완성했다</li>
+</ul>
+<ul class="chk">
+  <li>메뉴판에서 기능을 <b>하나 이상</b> 더했다</li>
+  <li><b>index.html</b> 파일로 저장했다</li>
+  <li><b>○○○.vercel.app</b> 주소를 받아 폰에서 열었다</li>
+  <li>친구 게임에 <b>댓글</b>을 남기고 투표했다</li>
+</ul>
+</div>
+<div class="box"><p class="t">오늘 기억할 3가지</p><ul><li>바이브코딩 = <b>요청 → 확인 → 테스트 → 수정</b>을 여러 바퀴</li><li>주문서는 <b>무엇을 · 규칙 1.2.3. · 분위기</b>, 고칠 땐 <b>증상과 원하는 결과</b>를 말하기</li><li>공유 전에 <b>개인정보</b>(이름·학번·얼굴)와 <b>저작권</b>(남의 그림) 확인</li></ul></div>
+</div></section>
+
+<section class="slide teacher" data-t="선생님 참고 — 운영 · 준비"><div class="si">
+<h2>선생님 참고 · 운영과 준비<small>수업 중에는 건너뛰어도 되는 슬라이드입니다.</small></h2>
+<table class="s"><thead><tr><th style="width:17%">항목</th><th>준비 · 대응</th></tr></thead><tbody>
+<tr><td class="k">계정</td><td>제미나이 · Canvas · 버셀 모두 <b>구글 계정</b>으로. 학교 계정이 외부 서비스 가입을 막는지 <b>수업 전 학생 계정 하나로 버셀 가입 테스트</b></td></tr>
+<tr><td class="k">패들렛</td><td>"33~34차시" 칸 미리 만들기 — 10초 챌린지 캡처 / 게임 주소 두 섹션</td></tr>
+<tr><td class="k">완성 예시</td><td>2번 슬라이드의 10초 게임은 교안 안에서 바로 작동 — 수업 시작 때 한 명 불러 도전시키면 집중↑</td></tr>
+<tr><td class="k">플랜 B</td><td>버셀 가입이 막히면 Canvas 오른쪽 위 <b>[공유] → 링크 복사</b>로 패들렛에 올리기</td></tr>
+<tr><td class="k">자주 막히는 곳</td><td>메모장 저장 시 <b>index.html.txt</b> / 한글 깨짐(UTF-8) / 버셀 팀 이름 한글 입력 / Pro 체험 선택</td></tr>
+<tr><td class="k">빨리 끝난 학생</td><td>게임을 2개 만들어 <b>시작 화면에서 고르는 게임 모음집</b>으로 합치기 도전</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="slide teacher" data-t="선생님 참고 — 막힐 때 Q&amp;A"><div class="si">
+<h2>선생님 참고 · 막힐 때 Q&amp;A</h2>
+<table class="s"><thead><tr><th style="width:32%">학생 질문</th><th>답</th></tr></thead><tbody>
+<tr><td class="k">코드 글자만 잔뜩 나와요</td><td>Canvas가 꺼져 있음 → [도구] → Canvas 켜고 다시 보내기</td></tr>
+<tr><td class="k">게임이 화면에 안 떠요</td><td>"<b>HTML 파일 하나로, Canvas에서 바로 실행되게</b> 다시 만들어 줘"</td></tr>
+<tr><td class="k">고쳤더니 다른 게 망가졌어요</td><td>"<b>방금 고치기 전으로 되돌려 줘</b>" 또는 Canvas 위쪽 이전 버전 보기</td></tr>
+<tr><td class="k">버셀 주소가 빈 화면이에요</td><td>폴더 안 파일 이름이 정확히 <b>index.html</b> 인지 / 폴더째 올렸는지 확인</td></tr>
+<tr><td class="k">주소 뒤에 이상한 단어가 붙었어요</td><td>이미 누가 쓰는 이름이라 그래요 — Domains에 보이는 그대로가 내 주소</td></tr>
+<tr><td class="k">고친 게임을 다시 올리고 싶어요</td><td>vercel.com <b>내 프로젝트 화면</b>에 폴더를 끌어다 놓기 (drop에 다시 올리면 새 주소)</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="slide teacher" data-t="선생님 참고 — 이 수업의 포인트"><div class="si">
+<h2>선생님 참고 · 이 수업의 포인트<small>참고 교안(AI로 만드는 식단 설계 앱 스튜디오 1~4차시)에서 가져온 요소</small></h2>
+<table class="s"><thead><tr><th style="width:20%">관점</th><th>내용</th></tr></thead><tbody>
+<tr><td class="k">재미 요소</td><td>교안 안에서 바로 하는 <b>10초 게임</b> · 친구와 디자인 비교 · <b>10초 챌린지 👑</b> · 서로 플레이 + 3부문 투표</td></tr>
+<tr><td class="k">기술 요소</td><td>바이브코딩 4단계(요청·확인·테스트·수정) · Gemini Canvas · HTML/CSS/JS 역할 · index.html · 버셀 배포</td></tr>
+<tr><td class="k">이론</td><td>정적 UI vs 동적 UI — 3형제를 <b>버튼 하나로 직접 체험</b>(이론 ② 슬라이드)</td></tr>
+<tr><td class="k">한 번에 끝나는 수업</td><td>다음 시간과 연결 없음 — 오늘 받은 주소가 결과물. 35~36차시는 처음 오는 학생도 따라올 수 있음</td></tr>
+<tr><td class="k">학생에게 남는 것</td><td>친구 폰에서도 열리는 <b>내 게임 주소</b>, 그리고 "말로 만들 수 있다"는 자신감</td></tr>
+</tbody></table>
+</div></section>
+
+</div></div>
+<button id="tocBtn" type="button">목차</button>
+<div id="nav"><button id="prev" type="button">← 이전</button><button id="next" type="button">다음 →</button></div>
+<div id="toc"><div class="th">목차 <span>번호를 누르면 이동합니다 · Esc 닫기</span></div><ol id="tocList"></ol></div>
+<script>
+/* ── 슬라이드 넘기기 ── */
+(function(){
+  var track=document.getElementById('track'),
+      slides=[].slice.call(track.children), total=slides.length, i=0,
+      bar=document.getElementById('bar'), cnt=document.getElementById('count'),
+      prev=document.getElementById('prev'), next=document.getElementById('next'),
+      toc=document.getElementById('toc'), tocList=document.getElementById('tocList'),
+      tocBtn=document.getElementById('tocBtn');
+
+  slides.forEach(function(s,n){
+    var t=s.getAttribute('data-t')||('슬라이드 '+(n+1)),
+        li=document.createElement('li'), b=document.createElement('button');
+    b.innerHTML='<b>'+String(n+1).padStart(2,'0')+'</b>'+t;
+    b.onclick=function(){go(n);toc.classList.remove('on');};
+    li.appendChild(b); tocList.appendChild(li);
+  });
+  var tb=[].slice.call(tocList.querySelectorAll('button'));
+
+  function go(n){
+    i=Math.max(0,Math.min(total-1,n));
+    track.style.transform='translateX(-'+(i*100)+'vw)';
+    slides[i].scrollTop=0;
+    bar.style.width=((i+1)/total*100)+'%';
+    cnt.textContent=String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+    prev.disabled=(i===0); next.disabled=(i===total-1);
+    tb.forEach(function(b,k){b.className=(k===i)?'cur':'';});
+    try{history.replaceState(null,'','#'+(i+1));}catch(e){}
+    document.dispatchEvent(new CustomEvent('slidechange',{detail:slides[i]}));
+  }
+  prev.onclick=function(){go(i-1);};
+  next.onclick=function(){go(i+1);};
+  tocBtn.onclick=function(){toc.classList.toggle('on');};
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){toc.classList.remove('on');return;}
+    if(toc.classList.contains('on'))return;
+    // 입력칸 · 데모 안에서는 키를 가로채지 않음
+    if(e.target.closest&&e.target.closest('input,textarea,select,.demo,.vp'))return;
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(total-1);}
+  });
+
+  var x0=null,y0=null;
+  track.addEventListener('touchstart',function(e){
+    if(e.target.closest('.demo,.vp,input'))return;
+    x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  track.addEventListener('touchend',function(e){
+    if(x0===null)return;
+    var dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) go(dx<0?i+1:i-1);
+    x0=null;
+  },{passive:true});
+
+  window.addEventListener('load',function(){
+    var st=parseInt((location.hash||'').replace('#',''),10);
+    go(isNaN(st)?0:st-1);
+  });
+})();
+
+/* ── 복사 버튼 (data-c 또는 data-from 대상의 글자) ── */
+document.addEventListener('click',function(e){
+  var btn=e.target.closest('.copy'); if(!btn)return;
+  var box=btn.parentNode, txt;
+  if(btn.getAttribute('data-from')){var src=document.getElementById(btn.getAttribute('data-from'));txt=src?src.textContent:'';}
+  else{var cl=box.cloneNode(true);[].forEach.call(cl.querySelectorAll('.copy'),function(c){c.remove()});txt=cl.textContent.trim();}
+  function done(){btn.textContent='복사됨';btn.classList.add('ok');
+    setTimeout(function(){btn.textContent='복사';btn.classList.remove('ok');},1600);}
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity=0;
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(err){}
+    document.body.removeChild(ta);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done,fallback);
+  else fallback();
+});
+
+/* ── 버셀 따라하기 플레이어 (도민 폴더 vercel-help.html 내용 이식) ── */
+(function(){
+  var root=document.getElementById('vp'); if(!root)return;
+  var slide=root.closest('.slide');
+  // h: 이미지 높이(가로 800 기준). 좌표는 이미지 안 위치(px)
+  var S=[
+    {img:'01',h:900,t:'vercel.com/drop 들어가기',d:'주소창에 <b>vercel.com/drop</b> 입력 → 오른쪽 위 <b>Sign Up</b>(가입) 누르기',act:[{c:[738,32]}]},
+    {img:'02',h:860,t:'구글로 가입',d:'<b>Continue with Google</b> 누르기',act:[{c:[391,380]}]},
+    {img:'03',h:660,t:'내 구글 계정으로 로그인',d:'계정을 고르거나, 메일 주소 입력 → 다음 → 비밀번호',act:[{c:[605,591]}]},
+    {img:'04',h:620,t:'요금제 고르기',d:'아래쪽 <b>I\'m working on personal projects (Hobby)</b> 누르기',w:'⚠ 처음엔 위쪽 Pro(유료 체험)에 체크되어 있어요!',act:[{box:[178,194,622,238],tag:'유료 ✕',gray:1},{c:[318,262]}]},
+    {img:'05',h:620,t:'팀 이름 쓰기',d:'<b>Team Name</b> 칸을 누르고 <b>영어</b>로 이름 쓰기 (예: kim)',w:'⚠ 한글은 안 들어가요 — 한/영 키로 바꾸기',act:[{c:[400,363]}]},
+    {img:'06',h:620,t:'Continue 누르기',d:'단추가 <b>검은색</b>으로 바뀌면 <b>Continue</b>',act:[{c:[400,464]}]},
+    {img:'07',h:900,t:'폴더 끌어다 놓기',d:'다시 <b>vercel.com/drop</b> → <b>my-game 폴더</b>를 통째로 가운데로 끌어다 놓기',act:[{drag:[[110,820],[400,470]]}]},
+    {img:'08',h:540,t:'이름 정하고 Deploy',d:'<b>Project Name</b>에 <b>영어 이름</b>(이게 주소가 돼요) → <b>Deploy</b> 누르기',act:[{c:[578,385]},{c:[400,454]}]},
+    {img:'09',h:540,t:'잠깐 기다리기',d:'Deploy 단추가 빙글빙글 — 몇 초면 끝나요',act:[{box:[64,432,736,476]}]},
+    {img:'10',h:700,t:'Congratulations! 🎉',d:'올리기 성공! 화면을 <b>아래로</b> 내립니다',act:[{box:[64,175,300,210]}]},
+    {img:'11',h:360,t:'Continue to Project',d:'맨 아래 <b>Continue to Project</b> 누르기',act:[{c:[391,307]}]},
+    {img:'12',h:810,t:'내 주소 확인',d:'<b>Domains</b> 아래 <b>○○○.vercel.app</b>이 내 주소! 옆 <b>↗</b>를 눌러 열고 → 주소창 누르고 <b>Ctrl+C</b>로 복사',w:'⚠ 위쪽 긴 주소(Deployment)는 보내지 마세요',act:[{box:[40,516,350,540],tag:'이건 아님',gray:1},{box:[40,588,246,614],tag:'내 주소 ✓'},{c:[228,601]}]},
+    {img:'13',h:540,t:'완성! 🙌',d:'내 게임이 인터넷에 올라갔어요. 주소를 폰으로 보내 열어 보세요',act:[]}
+  ];
+  var W=800, i=0, playing=true, active=false, timer=null, seq=[];
+  var $=function(id){return document.getElementById(id)};
+  var frame=$('vframe'),shot=$('vshot'),cur=$('vcursor'),ring=$('vring'),chip=$('vchip'),dots=$('vdots'),stage=$('vstage');
+  S.forEach(function(_,k){var e=document.createElement('i');e.title=(k+1)+'단계';e.onclick=function(){go(k)};dots.appendChild(e)});
+  S.forEach(function(s){var im=new Image();im.src='img/vercel-'+s.img+'.jpg'});
+  function pct(x,y,h){return {l:(x/W*100)+'%',t:(y/h*100)+'%'}}
+  function clear(){seq.forEach(clearTimeout);seq=[];clearTimeout(timer);
+    frame.querySelectorAll('.vbox,.vtag').forEach(function(e){e.remove()});
+    ring.classList.remove('go');chip.classList.remove('on');}
+  function later(fn,ms){seq.push(setTimeout(fn,ms))}
+  function moveCursor(x,y,h){var p=pct(x,y,h);cur.style.left=p.l;cur.style.top=p.t}
+  function fit(s){var hh=(stage.clientHeight||window.innerHeight*.6)-16, ww=(stage.clientWidth||600)-16;
+    frame.style.width=Math.min(ww,hh*W/s.h,560)+'px';}
+  function render(){
+    clear();
+    var s=S[i]; fit(s);
+    $('vcap').innerHTML='<span class="no">'+(i+1)+' / '+S.length+'</span><span class="t">'+s.t+'</span><div class="d">'+s.d+(s.w?'<span class="w">'+s.w+'</span>':'')+'</div>';
+    shot.src='img/vercel-'+s.img+'.jpg'; shot.alt=s.t;
+    [].forEach.call(dots.children,function(e,k){e.classList.toggle('on',k===i)});
+    cur.style.transition='none';moveCursor(560,s.h*0.92,s.h);cur.getBoundingClientRect();cur.style.transition='';
+    var t=500;
+    s.act.forEach(function(a){
+      if(a.box){later(function(){
+        var b=document.createElement('div');b.className='vbox'+(a.gray?' x':'');
+        var p=pct(a.box[0],a.box[1],s.h);b.style.left=p.l;b.style.top=p.t;
+        b.style.width=((a.box[2]-a.box[0])/W*100)+'%';b.style.height=((a.box[3]-a.box[1])/s.h*100)+'%';
+        frame.appendChild(b);requestAnimationFrame(function(){b.classList.add('on')});
+        if(a.tag){var g=document.createElement('div');g.className='vtag'+(a.gray?' gray':'');g.textContent=a.tag;
+          var q=pct(a.box[2]+6,a.box[1]-2,s.h);g.style.left=q.l;g.style.top=q.t;
+          if(a.box[2]>640){g.style.left='auto';g.style.right=((W-a.box[2])/W*100)+'%';g.style.top=((a.box[1]-26)/s.h*100)+'%'}
+          frame.appendChild(g);requestAnimationFrame(function(){g.classList.add('on')});}
+      },t);t+=700;}
+      if(a.c){later(function(){ring.classList.remove('go');moveCursor(a.c[0],a.c[1],s.h)},t);
+        later(function(){var p=pct(a.c[0],a.c[1],s.h);ring.style.left=p.l;ring.style.top=p.t;ring.classList.add('go')},t+950);
+        t+=1900;}
+      if(a.drag){var f=a.drag[0],to=a.drag[1];
+        later(function(){chip.style.transition='none';var p=pct(f[0],f[1],s.h);chip.style.left=p.l;chip.style.top=p.t;
+          chip.getBoundingClientRect();chip.style.transition='';chip.classList.add('on');moveCursor(f[0]+10,f[1]+8,s.h)},t);
+        later(function(){var p=pct(to[0],to[1],s.h);chip.style.left=p.l;chip.style.top=p.t;moveCursor(to[0]+10,to[1]+8,s.h)},t+1000);
+        later(function(){var p=pct(to[0],to[1],s.h);ring.style.left=p.l;ring.style.top=p.t;ring.classList.add('go')},t+2400);
+        t+=3000;}
+    });
+    var dur=Math.max(t+1800,3800);
+    var bar=$('vbar');bar.style.transition='none';bar.style.width='0';bar.getBoundingClientRect();
+    if(playing&&active){bar.style.transition='width '+dur+'ms linear';bar.style.width='100%';
+      timer=setTimeout(function(){go(i<S.length-1?i+1:0)},dur);}
+  }
+  function go(k){i=k;render()}
+  $('vprev').onclick=function(){go(Math.max(0,i-1))};
+  $('vnext').onclick=function(){go(Math.min(S.length-1,i+1))};
+  $('vplay').onclick=function(){playing=!playing;this.textContent=playing?'⏸ 멈춤':'▶ 재생';
+    if(playing){render()}else{clear();var b=$('vbar');b.style.transition='none';}};
+  root.addEventListener('keydown',function(e){if(e.key==='ArrowRight')$('vnext').click();if(e.key==='ArrowLeft')$('vprev').click()});
+  document.addEventListener('slidechange',function(e){
+    var now=(e.detail===slide);
+    if(now&&!active){active=true;render();}
+    else if(!now&&active){active=false;clear();}
+  });
+  window.addEventListener('resize',function(){if(active)fit(S[i])});
+  render();
+})();
+/* ── 완성 예시: 10초 맞추기 게임 ── */
+(function(){
+  var t=document.getElementById('g10t'); if(!t)return;
+  var s=document.getElementById('g10s'),p=document.getElementById('g10p'),r=document.getElementById('g10r'),
+      m=document.getElementById('g10m'),b=document.getElementById('g10b'),t0=0,raf=0,best=null;
+  try{best=parseFloat(localStorage.getItem('g10best'));if(isNaN(best))best=null;}catch(e){}
+  function showBest(){b.textContent=best===null?'':'🏆 이 컴퓨터 최고 기록: 오차 '+best.toFixed(2)+'초';}
+  function draw(sec){t.innerHTML=sec.toFixed(2)+'<span>초</span>';}
+  function tick(){var sec=(performance.now()-t0)/1000;draw(sec);t.classList.toggle('hide',sec>=3);raf=requestAnimationFrame(tick);}
+  s.onclick=function(){t0=performance.now();s.disabled=true;p.disabled=false;m.textContent='마음속으로 세는 중… 🤫';tick();};
+  p.onclick=function(){
+    cancelAnimationFrame(raf);var sec=(performance.now()-t0)/1000,diff=Math.abs(sec-10);
+    draw(sec);t.classList.remove('hide');s.disabled=false;p.disabled=true;
+    m.textContent=(diff<0.05?'🏆 신의 손! ':diff<0.2?'🎯 거의 완벽해요! ':diff<0.5?'👍 좋아요! ':'😅 다시 도전! ')+'오차 '+diff.toFixed(2)+'초';
+    if(best===null||diff<best){best=diff;try{localStorage.setItem('g10best',best)}catch(e){}if(diff<0.5)m.textContent+=' · 신기록!';}
+    showBest();
+  };
+  r.onclick=function(){cancelAnimationFrame(raf);draw(0);t.classList.remove('hide');s.disabled=false;p.disabled=true;m.textContent='기록에 도전해 보세요';};
+  showBest();
+})();
+
+/* ── 이론 ②: HTML · CSS · JS 직접 체험 ── */
+(function(){
+  var root=document.getElementById('lk'); if(!root)return;
+  var code=document.getElementById('lkc'),msg=document.getElementById('lkm'),btn=document.getElementById('lkb'),num=document.getElementById('lkn'),n=0;
+  var C={
+    h:['<span class="h">&lt;button&gt;♥ 좋아요 0&lt;/button&gt;</span>','뼈대만 있어요. 버튼은 있지만 밋밋하고, 눌러도 아무 일이 없어요 (정적 UI)'],
+    c:['<span class="h">&lt;button&gt;♥ 좋아요 0&lt;/button&gt;</span>\n<span class="c">button { background: orange;\n         color: white; border-radius: 30px; }</span>','인테리어를 입혔어요. 예뻐졌지만… 눌러 보세요. 여전히 숫자가 안 올라가요!'],
+    j:['<span class="h">&lt;button&gt;♥ 좋아요 0&lt;/button&gt;</span>\n<span class="c">button { background: orange; … }</span>\n<span class="j">button.addEventListener("click", () =&gt; {\n  count = count + 1;   // 누를 때마다 1씩!\n});</span>','스위치를 달았어요. 눌러 보세요 — 새로고침 없이 숫자가 올라가요 (동적 UI)']
+  };
+  function set(k){root.className='demo '+k;code.innerHTML=C[k][0];msg.textContent=C[k][1];
+    [].forEach.call(root.querySelectorAll('.lk-tabs button'),function(b){b.classList.toggle('on',b.getAttribute('data-s')===k)});
+    if(k!=='j'){n=0;num.textContent=0;}}
+  root.querySelector('.lk-tabs').onclick=function(e){var b=e.target.closest('button');if(b)set(b.getAttribute('data-s'));};
+  btn.onclick=function(){if(root.classList.contains('j')){n++;num.textContent=n;}};
+  set('h');
+})();
+
+/* ── STEP 2: 게임 설계표 → 주문서 ── */
+(function(){
+  var f=document.getElementById('gf'); if(!f)return;
+  var out=document.getElementById('gout'),KEY='gform33';
+  function val(n){var e=f.querySelector('[name='+n+']:checked')||f.querySelector('input[type=text][name='+n+']');return e?e.value.trim():'';}
+  function build(){
+    var kind=val('kind'),title=val('title')||(kind?kind+' 게임':'○○ 게임'),mood=val('mood'),
+        ext=[].map.call(f.querySelectorAll('[name=ext]:checked'),function(e){return e.value}),
+        rules=['r1','r2','r3'].map(val).filter(Boolean);
+    var lines=['웹 브라우저에서 바로 되는 \''+title+'\''+(kind&&title.indexOf(kind)<0?'('+kind+')':'')+' 게임을 HTML 파일 하나로 만들어 줘.'];
+    if(rules.length) rules.forEach(function(r,k){lines.push((k+1)+'. '+r.replace(/[.。]$/,'')+'.')});
+    else lines.push('1. (규칙을 적어 주세요)');
+    var k=rules.length||1;
+    ext.forEach(function(x){k++;lines.push(k+'. '+x+'.')});
+    k++;lines.push(k+'. 점수와 남은 기회(또는 시간)를 위쪽에 크게 보여 주고, 끝나면 [다시하기] 버튼.');
+    lines.push((mood?mood+' 분위기로, ':'')+'버튼은 크고 둥글게 만들어 줘.');
+    out.textContent=lines.join('\n');
+    var d={};[].forEach.call(f.elements,function(e){if(!e.name)return;if(e.type==='text')d[e.name]=e.value;else if(e.checked)(d[e.name]=d[e.name]||[]).push(e.value);});
+    try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}
+  }
+  function load(d){[].forEach.call(f.elements,function(e){if(!e.name)return;var v=d[e.name];
+    if(e.type==='text')e.value=v||'';else e.checked=!!(v&&v.indexOf(e.value)>=0);});build();}
+  f.addEventListener('input',build);f.addEventListener('change',build);
+  document.getElementById('gfx').onclick=function(){load({kind:['장애물 피하기'],title:'우주선 운석 피하기',r1:'방향키(폰은 터치)로 화면 아래 우주선을 좌우로 움직인다',r2:'위에서 떨어지는 운석을 피할 때마다 10점',r3:'운석에 3번 부딪히면 게임 오버',mood:['검은 우주 배경에 별이 반짝이는'],ext:['게임 전에 제목과 [시작하기] 버튼이 있는 첫 화면','시간이 지날수록 점점 빨라지고 어려워지게']});};
+  document.getElementById('gfc').onclick=function(){load({});};
+  var saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  load(saved);
+})();
+
+</script>
+</body>
+</html>
