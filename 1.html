@@ -135,6 +135,7 @@ ol.steps li .s{display:block;color:var(--gray);font-size:16px;margin-top:3px;lin
 .qs .lb{font-weight:700;color:var(--navy);font-size:17px;margin:0 0 4px}
 .qs .lb i{font-style:normal;color:var(--gray);font-weight:400;font-size:15px;margin-left:8px}
 .qs .prompt{margin:0;padding:12px 90px 12px 18px;font-size:17px;line-height:1.55}
+.prompt.nocopy,.qs .prompt.nocopy{padding-right:18px}
 
 /* 2단 레이아웃 */
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
@@ -379,10 +380,10 @@ ol.steps li .s{display:block;color:var(--gray);font-size:16px;margin-top:3px;lin
 <h2>고쳐 달라고 하기 — 수정 요청<small>"안 돼요" · "이상해요"는 AI가 못 알아들어요</small></h2>
 <p class="lead">[언제] + [무엇이] + [어떻게 되는데] → <em>[어떻게] 되게 해 줘</em></p>
 <div class="qs">
-  <div class="row"><p class="lb">조작 바꾸기<i>버튼 말고 키보드로</i></p><div class="prompt"><button class="copy" type="button">복사</button>시작 버튼 클릭 말고도 스페이스바를 이용해서 시작과 멈추기를 할 수 있게 해 줘.</div></div>
-  <div class="row"><p class="lb">기능 더하기<i>리셋</i></p><div class="prompt"><button class="copy" type="button">복사</button>리셋 버튼을 만들어 줘. 누르면 다시 처음처럼 0.00초로 보이게 해 줘.</div></div>
-  <div class="row"><p class="lb">난이도 올리기<i>숫자 숨기기</i></p><div class="prompt"><button class="copy" type="button">복사</button>3초가 지나면 숫자가 안 보이게 숨겨 줘. 멈추면 기록과 10초와의 오차를 보여 줘.</div></div>
-  <div class="row"><p class="lb">디자인 바꾸기<i>분위기</i></p><div class="prompt"><button class="copy" type="button">복사</button>좀 더 알록달록하고 예쁘게 디자인을 바꿔 줘. 배경은 그라데이션, 버튼은 크고 둥글게.</div></div>
+  <div class="row"><p class="lb">조작 바꾸기<i>버튼 말고 키보드로</i></p><div class="prompt nocopy">시작 버튼 클릭 말고도 스페이스바를 이용해서 시작과 멈추기를 할 수 있게 해 줘.</div></div>
+  <div class="row"><p class="lb">기능 더하기<i>리셋</i></p><div class="prompt nocopy">리셋 버튼을 만들어 줘. 누르면 다시 처음처럼 0.00초로 보이게 해 줘.</div></div>
+  <div class="row"><p class="lb">난이도 올리기<i>숫자 숨기기</i></p><div class="prompt nocopy">3초가 지나면 숫자가 안 보이게 숨겨 줘. 멈추면 기록과 10초와의 오차를 보여 줘.</div></div>
+  <div class="row"><p class="lb">디자인 바꾸기<i>분위기</i></p><div class="prompt nocopy">좀 더 알록달록하고 예쁘게 디자인을 바꿔 줘. 배경은 그라데이션, 버튼은 크고 둥글게.</div></div>
 </div>
 <p class="note">✔ <b>한 번에 하나씩</b> 요청하기 · 망가지면 "<b>방금 고치기 전으로 되돌려 줘</b>"</p>
 </div></section>
@@ -457,10 +458,10 @@ ol.steps li .s{display:block;color:var(--gray);font-size:16px;margin-top:3px;lin
 <div class="tags"><span class="tag do">STEP 2</span><span class="tm">2차시 · 58~70분</span></div>
 <h2>만들고, 해 보고, 개조하기<small>주문서를 보내 게임이 나오면 플레이 → 아래 메뉴판에서 골라 하나씩 요청</small></h2>
 <div class="qs">
-  <div class="row"><p class="lb">🎨 테마 바꾸기</p><div class="prompt"><button class="copy" type="button">복사</button>게임 캐릭터를 내가 좋아하는 이모지로 바꾸고, 배경은 밤하늘로 바꿔 줘.</div></div>
-  <div class="row"><p class="lb">💣 함정 넣기</p><div class="prompt"><button class="copy" type="button">복사</button>가끔 폭탄 💣이 나오게 하고, 폭탄을 건드리면 5점이 깎이게 해 줘.</div></div>
-  <div class="row"><p class="lb">🏆 신기록 축하</p><div class="prompt"><button class="copy" type="button">복사</button>최고 점수를 로컬 스토리지에 저장하고, 결과 화면에 "이번 점수"와 "최고 기록"을 나란히 보여 줘. 최고 기록을 넘으면 "신기록!"이 크게 뜨게 해 줘.</div></div>
-  <div class="row"><p class="lb">📱 폰에서 깨질 때</p><div class="prompt"><button class="copy" type="button">복사</button>휴대폰 세로 화면에서 버튼이 잘려. 화면 폭에 맞춰 자동으로 줄어들게 해 줘.</div></div>
+  <div class="row"><p class="lb">🎨 테마 바꾸기</p><div class="prompt nocopy">게임 캐릭터를 내가 좋아하는 이모지로 바꾸고, 배경은 밤하늘로 바꿔 줘.</div></div>
+  <div class="row"><p class="lb">💣 함정 넣기</p><div class="prompt nocopy">가끔 폭탄 💣이 나오게 하고, 폭탄을 건드리면 5점이 깎이게 해 줘.</div></div>
+  <div class="row"><p class="lb">🏆 신기록 축하</p><div class="prompt nocopy">최고 점수를 로컬 스토리지에 저장하고, 결과 화면에 "이번 점수"와 "최고 기록"을 나란히 보여 줘. 최고 기록을 넘으면 "신기록!"이 크게 뜨게 해 줘.</div></div>
+  <div class="row"><p class="lb">📱 폰에서 깨질 때</p><div class="prompt nocopy">휴대폰 세로 화면에서 버튼이 잘려. 화면 폭에 맞춰 자동으로 줄어들게 해 줘.</div></div>
 </div>
 <p class="note">그림은 <b>이모지</b>나 <b>AI가 새로 그린 것</b>만 — 인터넷에서 가져온 캐릭터 그림은 저작권 문제가 생길 수 있어요.</p>
 </div></section>
